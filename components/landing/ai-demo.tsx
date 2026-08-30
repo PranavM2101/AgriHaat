@@ -68,7 +68,7 @@ export function AIDemo() {
                   </div>
                   <span className="rounded-full bg-emerald-500/20 border border-emerald-500/30 px-2.5 py-1 text-[10px] font-bold text-emerald-400 flex items-center gap-1.5">
                     <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    Gemini 2.5 Flash
+                    Gemini 3.5 Flash Lite
                   </span>
                 </div>
 
