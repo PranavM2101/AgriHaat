@@ -11,26 +11,25 @@ export function Footer() {
   const productLinks = [
     { name: "Marketplace", href: "#marketplace" },
     { name: "How it works", href: "#how-it-works" },
+    { name: "Mandi vs Direct", href: "#comparison" },
     { name: "For Farmers", href: "#for-farmers" },
     { name: "For Buyers", href: "#for-buyers" },
-    { name: "Logistics", href: "#how-it-works" },
-    { name: "Demand Insights", href: "#proof" },
+    { name: "Procurement Pass", href: "/procurement" },
   ];
 
   const companyLinks = [
-    { name: "About", href: "/about" },
-    { name: "Careers", href: "/about" },
-    { name: "Blog", href: "/about" },
-    { name: "Contact", href: "/about" },
-    { name: "Privacy Policy", href: "/about" },
+    { name: "About AgriHaat", href: "/about" },
+    { name: "Careers", href: "/coming-soon" },
+    { name: "Agricultural Blog", href: "/coming-soon" },
+    { name: "Contact Team", href: "/about" },
+    { name: "Privacy Policy", href: "/coming-soon" },
   ];
 
   const supportLinks = [
-    { name: "Help Center", href: "#faq" },
-    { name: "FAQ", href: "#faq" },
-    { name: "Terms of Service", href: "/about" },
-    { name: "Grievance", href: "/about" },
-    { name: "Report an Issue", href: "/about" },
+    { name: "Help Center & FAQ", href: "#faq" },
+    { name: "Terms of Service", href: "/coming-soon" },
+    { name: "Farmer Grievance Cell", href: "/coming-soon" },
+    { name: "Report Mandi Issue", href: "/coming-soon" },
   ];
 
   return (
@@ -39,13 +38,23 @@ export function Footer() {
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-12 lg:gap-8 pb-14 border-b border-white/10">
           {/* Brand Column */}
           <div className="sm:col-span-2 lg:col-span-4 space-y-4">
-            <div className="brightness-125">
-              <LogoWithTagline />
+            <div className="flex items-center gap-3">
+              <img
+                src="/logo-light.png"
+                alt="AgriHaat AI"
+                className="h-10 w-auto object-contain"
+                onError={(e) => {
+                  (e.target as HTMLElement).style.display = "none";
+                }}
+              />
+              <span className="font-serif text-2xl font-bold tracking-tight text-white">
+                Agri<span className="text-[#22c55e]">Haat</span> AI
+              </span>
             </div>
             <p className="max-w-sm text-xs leading-relaxed text-gray-400">
               {t.footerDesc}
             </p>
-            <div className="pt-2 text-xs text-[#16A34A] font-medium">
+            <div className="pt-1 text-xs text-[#22c55e] font-semibold tracking-wide">
               Direct Roots. Stronger Tomorrow.
             </div>
           </div>

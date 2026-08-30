@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Check, MapPin, Minus, Plus, ShieldCheck, TrendingUp } from "lucide-react";
 import { useLanguage, rupees } from "@/components/site/language-context";
 import { demandForecast } from "@/lib/demo-data";
@@ -90,18 +91,18 @@ export function HeroProductCard() {
                 <Plus className="size-3.5" />
               </button>
             </div>
-            <button
-              type="button"
-              className="h-11 rounded-full bg-[#16803A] px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-[#16803A]/90 sm:w-auto"
+            <Link
+              href="/auth/login"
+              className="flex h-11 items-center justify-center rounded-full bg-[#16803A] px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-[#16803A]/90 sm:w-auto"
             >
               {t.addToOrder}
-            </button>
+            </Link>
           </div>
         </div>
       </div>
 
       {/* Floating secondary card: Nearby Demand */}
-      <div className="relative -mt-6 ml-auto mr-4 w-[240px] rounded-2xl border border-[#E2E7E2] bg-white p-4 shadow-[0_12px_32px_rgba(23,32,25,0.12)] sm:-mt-10 sm:-mr-6 sm:w-[270px]">
+      <div className="mt-4 sm:mt-0 sm:absolute sm:-bottom-8 sm:-right-4 z-20 w-full sm:w-[270px] rounded-2xl border border-[#E2E7E2] bg-white p-4 shadow-[0_14px_36px_rgba(23,32,25,0.12)]">
         <div className="flex items-center justify-between">
           <span className="text-[11px] font-bold uppercase tracking-wider text-[#16803A]">
             {t.nearbyDemand}
@@ -111,7 +112,7 @@ export function HeroProductCard() {
           </span>
         </div>
         <div className="mt-2">
-          <p className="text-xs text-[#687D6B]">Chennai</p>
+          <p className="text-xs text-[#687D6B]">Chennai Mandi Hub</p>
           <p className="text-xl font-bold tracking-tight text-[#172019]">
             {demandForecast.expectedDemand.toLocaleString("en-IN")} kg
           </p>

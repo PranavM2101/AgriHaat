@@ -37,7 +37,7 @@ export function FinalCTA() {
         <ScrollReveal delay={300}>
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link
-              href="#marketplace"
+              href="/auth/login"
               className="inline-flex h-12 w-full items-center justify-center rounded-full bg-[#16803A] px-8 text-sm font-semibold text-white shadow-lg transition hover:bg-[#16A34A] sm:w-auto"
             >
               {t.getStarted}

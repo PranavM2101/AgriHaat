@@ -3,18 +3,30 @@
 import { useState, useEffect } from "react";
 import { Bell, X, CheckCheck, ExternalLink, Calendar, ShoppingBag, TrendingUp, DollarSign } from "lucide-react";
 import { NotificationService } from "@/lib/services";
-import { type AppNotification } from "@/lib/store";
 import { useLanguage } from "@/components/site/language-context";
+import { useAuth } from "@/components/auth/auth-context";
 import Link from "next/link";
 
 export function NotificationDrawer() {
   const [open, setOpen] = useState(false);
-  const [notifications, setNotifications] = useState<AppNotification[]>([]);
+  const [allNotifications, setAllNotifications] = useState<AppNotification[]>([]);
   const { lang } = useLanguage();
+  const { user } = useAuth();
+
+  const role = user?.role || "farmer";
 
   useEffect(() => {
-    NotificationService.getNotifications().then(setNotifications);
+    NotificationService.getNotifications().then(setAllNotifications);
   }, [open]);
+
+  // Filter notifications strictly according to the active role
+  const notifications = allNotifications.filter((n) => {
+    if (role === "admin") return true;
+    if (role === "farmer") return n.category === "PROCUREMENT" || n.category === "PAYMENT" || n.category === "PRICE" || n.category === "ORDER";
+    if (role === "buyer") return n.category === "ORDER" || n.category === "PRICE";
+    if (role === "hub") return n.category === "ORDER" || n.category === "PROCUREMENT";
+    return true;
+  });
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 

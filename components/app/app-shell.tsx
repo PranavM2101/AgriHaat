@@ -33,6 +33,7 @@ import { useLanguage, LanguageSwitcher } from "@/components/site/language-contex
 import { RoleSwitcherBadge } from "./role-switcher";
 import { NotificationDrawer } from "./notification-drawer";
 import { AIAssistantModal } from "@/components/ai/ai-assistant-modal";
+import { QuickTutorialModal } from "./quick-tutorial-modal";
 import { Sparkles } from "lucide-react";
 
 interface NavItem {
@@ -209,7 +210,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
 
           {/* Right Header Actions */}
-          <div className="flex items-center gap-2.5 sm:gap-3">
+          <div className="flex items-center gap-2 sm:gap-2.5">
+            <QuickTutorialModal />
             <RoleSwitcherBadge />
             <LanguageSwitcher />
             <NotificationDrawer />

@@ -71,7 +71,7 @@ Response Style:
               },
             ],
             generationConfig: {
-              maxOutputTokens: 400,
+              maxOutputTokens: 2048,
               temperature: 0.6,
             },
           }),

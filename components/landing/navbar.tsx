@@ -22,9 +22,10 @@ export function Navbar() {
   const navLinks = [
     { label: t.home, href: "/" },
     { label: t.howItWorks, href: "#how-it-works" },
-    { label: t.marketplace, href: "/marketplace" },
-    { label: t.forFarmers, href: "/farmer/dashboard" },
-    { label: t.forBuyers, href: "/buyer/dashboard" },
+    { label: t.marketplace, href: "#marketplace" },
+    { label: "Mandi vs Direct", href: "#comparison" },
+    { label: t.forFarmers, href: "#for-farmers" },
+    { label: t.forBuyers, href: "#for-buyers" },
     { label: "Procurement", href: "/procurement" },
   ];
 
