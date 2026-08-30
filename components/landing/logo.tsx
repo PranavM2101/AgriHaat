@@ -1,7 +1,7 @@
 "use client";
 
-// ─── AgriHaat AI Premium Logo ───
-// Fusion of Golden Harvest Stalk + Emerald Sprout + Direct Marketplace Node
+import { useState } from "react";
+import Image from "next/image";
 
 interface LogoProps {
   className?: string;
@@ -10,6 +10,22 @@ interface LogoProps {
 }
 
 export function LogoIcon({ size = 38 }: { size?: number }) {
+  const [imgError, setImgError] = useState(false);
+
+  if (!imgError) {
+    return (
+      <img
+        src="/logo-mark.png"
+        alt="AgriHaat AI Logo"
+        width={size}
+        height={size}
+        onError={() => setImgError(true)}
+        className="shrink-0 object-contain transition-transform duration-300 hover:scale-105 rounded-xl shadow-2xs"
+        style={{ width: size, height: size }}
+      />
+    );
+  }
+
   return (
     <svg
       width={size}
@@ -37,25 +53,24 @@ export function LogoIcon({ size = 38 }: { size?: number }) {
         </linearGradient>
       </defs>
 
-      {/* Outer rounded hexagon shield / marketplace canopy */}
+      {/* Outer rounded hexagon shield */}
       <rect x="2" y="2" width="44" height="44" rx="14" fill="url(#agriGlow)" stroke="#16803A" strokeWidth="1.5" strokeOpacity="0.25" />
 
-      {/* Sun / Dawn of Agri Marketplace */}
+      {/* Sun */}
       <circle cx="24" cy="15" r="7" fill="url(#agriGradientGold)" opacity="0.35" />
       <circle cx="24" cy="15" r="3.5" fill="url(#agriGradientGold)" />
 
-      {/* Dynamic Furrow lines / Marketplace Trade Streams */}
+      {/* Furrow lines */}
       <path d="M7 38 C14 31, 20 33, 24 29 C28 33, 34 31, 41 38" stroke="#16803A" strokeWidth="2.2" strokeLinecap="round" />
       <path d="M10 42 C16 36, 21 38, 24 35 C27 38, 32 36, 38 42" stroke="#16A34A" strokeWidth="1.6" strokeLinecap="round" opacity="0.6" />
 
-      {/* Central Sprout Leaf & Harvest Stalk */}
+      {/* Central Sprout */}
       <path
         d="M24 8 C17 15, 13.5 24, 24 33 C34.5 24, 31 15, 24 8 Z"
         fill="url(#agriGradientEmerald)"
-        filter="drop-shadow(0 2px 4px rgba(22, 128, 58, 0.25))"
       />
 
-      {/* Internal Vein / Direct Route Path to Market */}
+      {/* Internal Vein */}
       <path d="M24 13 L24 29" stroke="#FFFFFF" strokeWidth="1.75" strokeLinecap="round" />
       <path d="M24 19 L19.5 16" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="round" />
       <path d="M24 23 L28.5 20" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="round" />
@@ -64,19 +79,33 @@ export function LogoIcon({ size = 38 }: { size?: number }) {
 }
 
 export function Logo({ className = "", size = 38, showBadge = true }: LogoProps) {
+  const [useImageBrand, setUseImageBrand] = useState(true);
+
   return (
     <div className={`flex items-center gap-2.5 select-none ${className}`}>
-      <LogoIcon size={size} />
-      <div className="flex items-center">
-        <span className="font-serif text-2xl font-bold tracking-tight text-[#172019]">
-          Agri<span className="text-[#16803A]">Haat</span>
-        </span>
-        {showBadge && (
-          <span className="ml-2 rounded-md bg-gradient-to-r from-[#16803A] to-[#22C55E] px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-white shadow-2xs">
-            AI
-          </span>
-        )}
-      </div>
+      {useImageBrand ? (
+        <img
+          src="/logo-main.png"
+          alt="AgriHaat AI"
+          height={size}
+          onError={() => setUseImageBrand(false)}
+          className="h-9 sm:h-10 w-auto object-contain shrink-0"
+        />
+      ) : (
+        <>
+          <LogoIcon size={size} />
+          <div className="flex items-center">
+            <span className="font-serif text-2xl font-bold tracking-tight text-[#172019]">
+              Agri<span className="text-[#16803A]">Haat</span>
+            </span>
+            {showBadge && (
+              <span className="ml-2 rounded-md bg-gradient-to-r from-[#16803A] to-[#22C55E] px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-white shadow-2xs">
+                AI
+              </span>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -89,9 +118,10 @@ export function LogoWithTagline({ className = "", size = 38 }: LogoProps) {
   return (
     <div className={className}>
       <Logo size={size} />
-      <p className="mt-1 ml-[calc(38px+10px)] text-[11px] font-medium tracking-wide text-[#687D6B]">
+      <p className="mt-1 text-[11px] font-medium tracking-wide text-[#687D6B]">
         Direct Roots. Stronger Tomorrow.
       </p>
     </div>
   );
 }
+

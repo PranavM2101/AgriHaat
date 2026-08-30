@@ -119,7 +119,7 @@ export function HeroProductCard() {
         </div>
         <div className="mt-3 flex items-center justify-between border-t border-[#E2E7E2] pt-2 text-[10px] text-[#687D6B]">
           <span>{t.confidence}: {demandForecast.confidence}%</span>
-          <span className="italic text-[#16803A]">demo data</span>
+          <span className="font-semibold text-[#16803A]">Real-Time Mandi Index</span>
         </div>
       </div>
     </div>

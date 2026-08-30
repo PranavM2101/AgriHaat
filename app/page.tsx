@@ -62,7 +62,6 @@ export default function Home() {
 
       {/* Floating Utilities */}
       <ScrollToTop />
-      <HelpWidget />
     </main>
   );
 }

@@ -107,13 +107,22 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   const navLinks = getNavLinks();
 
+  const dashboardHref =
+    role === "buyer"
+      ? "/buyer/dashboard"
+      : role === "hub"
+      ? "/logistics/dashboard"
+      : role === "admin"
+      ? "/admin/dashboard"
+      : "/farmer/dashboard";
+
   return (
     <div className="min-h-screen bg-[#FAFAF7] text-[#172019] flex">
       {/* ─── Desktop Sidebar ─── */}
       <aside className="hidden lg:flex flex-col w-64 border-r border-[#E2E7E2] bg-white h-screen sticky top-0 z-30">
         {/* Brand Header */}
         <div className="h-[74px] flex items-center px-6 border-b border-[#E2E7E2]">
-          <Link href="/" className="shrink-0" aria-label="Farm2Market AI Home">
+          <Link href={dashboardHref} className="shrink-0" aria-label="AgriHaat AI Dashboard">
             <Logo size={32} />
           </Link>
         </div>
@@ -188,7 +197,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               {mobileMenuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
             </button>
             <div className="lg:hidden">
-              <Link href="/">
+              <Link href={dashboardHref}>
                 <Logo size={28} />
               </Link>
             </div>

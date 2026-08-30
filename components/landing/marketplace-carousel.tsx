@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import Link from "next/link";
 import { ChevronLeft, ChevronRight, MapPin, ShieldCheck } from "lucide-react";
 import { useLanguage, rupees } from "@/components/site/language-context";
 import { produceListings } from "@/lib/demo-data";
@@ -121,12 +122,12 @@ export function MarketplaceCarousel() {
               </div>
 
               {/* Action */}
-              <button
-                type="button"
-                className="mt-4 w-full rounded-full border border-[#E2E7E2] bg-white py-2 text-xs font-semibold text-[#172019] transition hover:bg-[#16803A] hover:text-white hover:border-[#16803A]"
+              <Link
+                href={`/marketplace/${item.id}`}
+                className="mt-4 block text-center w-full rounded-full border border-[#E2E7E2] bg-white py-2 text-xs font-semibold text-[#172019] transition hover:bg-[#16803A] hover:text-white hover:border-[#16803A]"
               >
                 {t.viewDetails}
-              </button>
+              </Link>
             </div>
           ))}
         </div>
