@@ -15,7 +15,7 @@ export async function POST(req: Request) {
     }
 
     const apiKey = process.env.GEMINI_API_KEY;
-    const primaryModel = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+    const primaryModel = process.env.GEMINI_MODEL || "gemini-3.5-flash-lite";
 
     // System prompt grounding the Gemini model in AgriHaat platform data
     const SYSTEM_PROMPT = `You are AgriHaat Copilot, an official agricultural AI intelligence system for India (Smart India Hackathon - Ministry of Consumer Affairs Problem Statement 26033/26032).
@@ -52,10 +52,11 @@ Response Style:
 
     const modelsToTry = [
       primaryModel,
+      "gemini-3.5-flash-lite",
+      "gemini-3.5-flash",
+      "gemini-2.5-flash-lite",
       "gemini-2.5-flash",
-      "gemini-2.0-flash",
       "gemini-1.5-flash",
-      "gemini-1.5-pro",
     ];
     let lastError = "";
 

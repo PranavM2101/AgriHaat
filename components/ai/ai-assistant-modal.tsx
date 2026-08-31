@@ -111,7 +111,7 @@ export function AIAssistantModal({ isOpen, onClose }: { isOpen: boolean; onClose
                 <h3 className="font-serif text-base font-semibold">AgriHaat Copilot</h3>
                 <span className="inline-flex items-center gap-1 rounded-full bg-[#16803A]/20 border border-[#16803A]/40 px-2 py-0.5 text-[9px] font-bold text-[#4ade80]">
                   <span className="size-1.5 rounded-full bg-[#4ade80] animate-pulse" />
-                  Gemini 2.5 Flash
+                  Gemini 3.5 Flash Lite
                 </span>
               </div>
               <p className="text-[11px] text-gray-300">Grounded Agricultural AI & Mandi Intelligence</p>
