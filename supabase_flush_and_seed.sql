@@ -2,16 +2,22 @@
 -- AgriHaat AI — 1-Click Flush & Seed Script for Supabase PostgreSQL
 -- Problem Statement 26033 (Direct Marketplace) & 26032 (Procurement Queue)
 -- ============================================================================
--- INSTRUCTIONS FOR LIVE DEMO:
+-- INSTRUCTIONS FOR LIVE DEMO / SIH PRESENTATION:
 -- 1. Open your Supabase Dashboard -> SQL Editor
--- 2. Click "New Query", paste this entire file, and click "Run" (Ctrl+Enter)
--- 3. All old tables will be dropped and freshly seeded with realistic SIH data.
+-- 2. Click "New Query", paste this ENTIRE file, and click "Run" (Ctrl+Enter)
+-- 3. This script will:
+--    - Enable required extensions (uuid-ossp, pgcrypto)
+--    - Drop and recreate all 10 application tables with proper schema & RLS
+--    - DIRECTLY provision 5 Real Auth Personas into auth.users & auth.identities
+--      (Password for all personas: AgriHaat@2026)
+--    - Seed all 10 tables with production-ready SIH demo data
 -- ============================================================================
 
--- 1. Enable UUID Extension
+-- 1. Enable Required Extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
--- 2. Clean Existing Tables (Drop in Reverse Dependency Order)
+-- 2. Clean Existing Public Tables (Drop in Reverse Dependency Order)
 DROP TABLE IF EXISTS audit_logs CASCADE;
 DROP TABLE IF EXISTS notifications CASCADE;
 DROP TABLE IF EXISTS demand_forecasts CASCADE;
@@ -236,36 +242,213 @@ CREATE TABLE audit_logs (
 );
 
 -- ============================================================================
--- Security Policies (RLS)
+-- Row Level Security (RLS) Policies
 -- ============================================================================
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE produce_listings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
+ALTER TABLE order_allocations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE procurement_centres ENABLE ROW LEVEL SECURITY;
 ALTER TABLE procurement_bookings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE logistics_routes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE demand_forecasts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE audit_logs ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Public read produce listings" ON produce_listings FOR ALL USING (true);
-CREATE POLICY "Public read procurement centres" ON procurement_centres FOR ALL USING (true);
-CREATE POLICY "Public read demand forecasts" ON demand_forecasts FOR ALL USING (true);
-CREATE POLICY "Public read logistics routes" ON logistics_routes FOR ALL USING (true);
-CREATE POLICY "Public access profiles" ON profiles FOR ALL USING (true);
-CREATE POLICY "Public access orders" ON orders FOR ALL USING (true);
-CREATE POLICY "Public access order allocations" ON order_allocations FOR ALL USING (true);
-CREATE POLICY "Public access bookings" ON procurement_bookings FOR ALL USING (true);
-CREATE POLICY "Public access notifications" ON notifications FOR ALL USING (true);
+CREATE POLICY "Public full access profiles" ON profiles FOR ALL USING (true);
+CREATE POLICY "Public full access produce listings" ON produce_listings FOR ALL USING (true);
+CREATE POLICY "Public full access orders" ON orders FOR ALL USING (true);
+CREATE POLICY "Public full access order allocations" ON order_allocations FOR ALL USING (true);
+CREATE POLICY "Public full access procurement centres" ON procurement_centres FOR ALL USING (true);
+CREATE POLICY "Public full access procurement bookings" ON procurement_bookings FOR ALL USING (true);
+CREATE POLICY "Public full access logistics routes" ON logistics_routes FOR ALL USING (true);
+CREATE POLICY "Public full access demand forecasts" ON demand_forecasts FOR ALL USING (true);
+CREATE POLICY "Public full access notifications" ON notifications FOR ALL USING (true);
+CREATE POLICY "Public full access audit logs" ON audit_logs FOR ALL USING (true);
+
+-- ============================================================================
+-- 🔐 PROVISION REAL SUPABASE AUTH USERS (auth.users + auth.identities)
+-- Password for all personas: AgriHaat@2026
+-- ============================================================================
+
+-- Clean old auth identities and users if present
+DELETE FROM auth.identities WHERE user_id IN (
+    'a1111111-1111-1111-1111-111111111111'::uuid,
+    'b2222222-2222-2222-2222-222222222222'::uuid,
+    'c3333333-3333-3333-3333-333333333333'::uuid,
+    'd4444444-4444-4444-4444-444444444444'::uuid,
+    'e5555555-5555-5555-5555-555555555555'::uuid
+);
+
+DELETE FROM auth.users WHERE id IN (
+    'a1111111-1111-1111-1111-111111111111'::uuid,
+    'b2222222-2222-2222-2222-222222222222'::uuid,
+    'c3333333-3333-3333-3333-333333333333'::uuid,
+    'd4444444-4444-4444-4444-444444444444'::uuid,
+    'e5555555-5555-5555-5555-555555555555'::uuid
+) OR email IN (
+    'ramesh.k@abcfpo.in',
+    'anita.rao@abcrestaurants.com',
+    'murugan@chennaisupplyhub.in',
+    'suresh@greenfieldsfpo.org',
+    'ops@agrihaat.ai'
+);
+
+-- Persona 1: Farmer (Ramesh Kumar)
+INSERT INTO auth.users (
+    instance_id, id, aud, role, email, encrypted_password,
+    email_confirmed_at, raw_app_meta_data, raw_user_meta_data,
+    created_at, updated_at, confirmation_token, recovery_token,
+    email_change_token_new, email_change, phone_change, phone_change_token,
+    reauthentication_token, email_change_confirm_status, is_sso_user, is_anonymous
+) VALUES (
+    '00000000-0000-0000-0000-000000000000',
+    'a1111111-1111-1111-1111-111111111111'::uuid,
+    'authenticated', 'authenticated', 'ramesh.k@abcfpo.in',
+    crypt('AgriHaat@2026', gen_salt('bf')),
+    NOW(),
+    '{"provider":"email","providers":["email"]}'::jsonb,
+    '{"full_name":"Ramesh Kumar","role":"farmer"}'::jsonb,
+    NOW(), NOW(), '', '', '', '', '', '', '', 0, false, false
+);
+
+INSERT INTO auth.identities (
+    id, user_id, identity_data, provider, provider_id, last_sign_in_at, created_at, updated_at
+) VALUES (
+    gen_random_uuid(),
+    'a1111111-1111-1111-1111-111111111111'::uuid,
+    '{"sub":"a1111111-1111-1111-1111-111111111111","email":"ramesh.k@abcfpo.in"}'::jsonb,
+    'email',
+    'a1111111-1111-1111-1111-111111111111',
+    NOW(), NOW(), NOW()
+);
+
+-- Persona 2: Buyer (Anita Rao)
+INSERT INTO auth.users (
+    instance_id, id, aud, role, email, encrypted_password,
+    email_confirmed_at, raw_app_meta_data, raw_user_meta_data,
+    created_at, updated_at, confirmation_token, recovery_token,
+    email_change_token_new, email_change, phone_change, phone_change_token,
+    reauthentication_token, email_change_confirm_status, is_sso_user, is_anonymous
+) VALUES (
+    '00000000-0000-0000-0000-000000000000',
+    'b2222222-2222-2222-2222-222222222222'::uuid,
+    'authenticated', 'authenticated', 'anita.rao@abcrestaurants.com',
+    crypt('AgriHaat@2026', gen_salt('bf')),
+    NOW(),
+    '{"provider":"email","providers":["email"]}'::jsonb,
+    '{"full_name":"Anita Rao","role":"buyer"}'::jsonb,
+    NOW(), NOW(), '', '', '', '', '', '', '', 0, false, false
+);
+
+INSERT INTO auth.identities (
+    id, user_id, identity_data, provider, provider_id, last_sign_in_at, created_at, updated_at
+) VALUES (
+    gen_random_uuid(),
+    'b2222222-2222-2222-2222-222222222222'::uuid,
+    '{"sub":"b2222222-2222-2222-2222-222222222222","email":"anita.rao@abcrestaurants.com"}'::jsonb,
+    'email',
+    'b2222222-2222-2222-2222-222222222222',
+    NOW(), NOW(), NOW()
+);
+
+-- Persona 3: Hub & Logistics Driver (Murugan S.)
+INSERT INTO auth.users (
+    instance_id, id, aud, role, email, encrypted_password,
+    email_confirmed_at, raw_app_meta_data, raw_user_meta_data,
+    created_at, updated_at, confirmation_token, recovery_token,
+    email_change_token_new, email_change, phone_change, phone_change_token,
+    reauthentication_token, email_change_confirm_status, is_sso_user, is_anonymous
+) VALUES (
+    '00000000-0000-0000-0000-000000000000',
+    'c3333333-3333-3333-3333-333333333333'::uuid,
+    'authenticated', 'authenticated', 'murugan@chennaisupplyhub.in',
+    crypt('AgriHaat@2026', gen_salt('bf')),
+    NOW(),
+    '{"provider":"email","providers":["email"]}'::jsonb,
+    '{"full_name":"Murugan S.","role":"hub"}'::jsonb,
+    NOW(), NOW(), '', '', '', '', '', '', '', 0, false, false
+);
+
+INSERT INTO auth.identities (
+    id, user_id, identity_data, provider, provider_id, last_sign_in_at, created_at, updated_at
+) VALUES (
+    gen_random_uuid(),
+    'c3333333-3333-3333-3333-333333333333'::uuid,
+    '{"sub":"c3333333-3333-3333-3333-333333333333","email":"murugan@chennaisupplyhub.in"}'::jsonb,
+    'email',
+    'c3333333-3333-3333-3333-333333333333',
+    NOW(), NOW(), NOW()
+);
+
+-- Persona 4: FPO Lead & Farmer (Suresh Reddy)
+INSERT INTO auth.users (
+    instance_id, id, aud, role, email, encrypted_password,
+    email_confirmed_at, raw_app_meta_data, raw_user_meta_data,
+    created_at, updated_at, confirmation_token, recovery_token,
+    email_change_token_new, email_change, phone_change, phone_change_token,
+    reauthentication_token, email_change_confirm_status, is_sso_user, is_anonymous
+) VALUES (
+    '00000000-0000-0000-0000-000000000000',
+    'd4444444-4444-4444-4444-444444444444'::uuid,
+    'authenticated', 'authenticated', 'suresh@greenfieldsfpo.org',
+    crypt('AgriHaat@2026', gen_salt('bf')),
+    NOW(),
+    '{"provider":"email","providers":["email"]}'::jsonb,
+    '{"full_name":"Suresh Reddy","role":"farmer"}'::jsonb,
+    NOW(), NOW(), '', '', '', '', '', '', '', 0, false, false
+);
+
+INSERT INTO auth.identities (
+    id, user_id, identity_data, provider, provider_id, last_sign_in_at, created_at, updated_at
+) VALUES (
+    gen_random_uuid(),
+    'd4444444-4444-4444-4444-444444444444'::uuid,
+    '{"sub":"d4444444-4444-4444-4444-444444444444","email":"suresh@greenfieldsfpo.org"}'::jsonb,
+    'email',
+    'd4444444-4444-4444-4444-444444444444',
+    NOW(), NOW(), NOW()
+);
+
+-- Persona 5: AgriHaat Central Admin
+INSERT INTO auth.users (
+    instance_id, id, aud, role, email, encrypted_password,
+    email_confirmed_at, raw_app_meta_data, raw_user_meta_data,
+    created_at, updated_at, confirmation_token, recovery_token,
+    email_change_token_new, email_change, phone_change, phone_change_token,
+    reauthentication_token, email_change_confirm_status, is_sso_user, is_anonymous
+) VALUES (
+    '00000000-0000-0000-0000-000000000000',
+    'e5555555-5555-5555-5555-555555555555'::uuid,
+    'authenticated', 'authenticated', 'ops@agrihaat.ai',
+    crypt('AgriHaat@2026', gen_salt('bf')),
+    NOW(),
+    '{"provider":"email","providers":["email"]}'::jsonb,
+    '{"full_name":"AgriHaat Central Admin","role":"admin"}'::jsonb,
+    NOW(), NOW(), '', '', '', '', '', '', '', 0, false, false
+);
+
+INSERT INTO auth.identities (
+    id, user_id, identity_data, provider, provider_id, last_sign_in_at, created_at, updated_at
+) VALUES (
+    gen_random_uuid(),
+    'e5555555-5555-5555-5555-555555555555'::uuid,
+    '{"sub":"e5555555-5555-5555-5555-555555555555","email":"ops@agrihaat.ai"}'::jsonb,
+    'email',
+    'e5555555-5555-5555-5555-555555555555',
+    NOW(), NOW(), NOW()
+);
 
 -- ============================================================================
 -- 🚀 POPULATE REALISTIC DEMONSTRATION SEED DATA
 -- ============================================================================
 
--- 1. Insert 5 Verified User Profiles
-INSERT INTO profiles (id, full_name, role, phone, email, organization, location, pincode, lat, lng, bank_account_masked, bank_ifsc, verified)
+-- 1. Insert 5 Verified User Profiles linked to auth.users
+INSERT INTO profiles (id, user_id, full_name, role, phone, email, organization, location, pincode, lat, lng, avatar_letter, bank_account_masked, bank_ifsc, dbt_linked, verified)
 VALUES 
 (
-    'a1111111-1111-1111-1111-111111111111',
+    'a1111111-1111-1111-1111-111111111111'::uuid,
+    'a1111111-1111-1111-1111-111111111111'::uuid,
     'Ramesh Kumar',
     'farmer',
     '+91 98401 23456',
@@ -275,12 +458,15 @@ VALUES
     '631501',
     12.8342,
     79.7036,
+    'R',
     '•••• •••• •••• 4892',
     'SBIN0001234',
+    true,
     true
 ),
 (
-    'b2222222-2222-2222-2222-222222222222',
+    'b2222222-2222-2222-2222-222222222222'::uuid,
+    'b2222222-2222-2222-2222-222222222222'::uuid,
     'Anita Rao',
     'buyer',
     '+91 97100 88990',
@@ -290,12 +476,15 @@ VALUES
     '600006',
     13.0604,
     80.2496,
+    'A',
     '•••• •••• •••• 9102',
     'HDFC0000120',
+    true,
     true
 ),
 (
-    'c3333333-3333-3333-3333-333333333333',
+    'c3333333-3333-3333-3333-333333333333'::uuid,
+    'c3333333-3333-3333-3333-333333333333'::uuid,
     'Murugan S.',
     'hub',
     '+91 94440 55667',
@@ -305,12 +494,15 @@ VALUES
     '631605',
     12.8120,
     79.8240,
+    'M',
     '•••• •••• •••• 3341',
     'ICIC0000551',
+    true,
     true
 ),
 (
-    'd4444444-4444-4444-4444-444444444444',
+    'd4444444-4444-4444-4444-444444444444'::uuid,
+    'd4444444-4444-4444-4444-444444444444'::uuid,
     'Suresh Reddy',
     'farmer',
     '+91 94400 88776',
@@ -320,12 +512,15 @@ VALUES
     '631605',
     12.8120,
     79.8240,
+    'S',
     '•••• •••• •••• 1129',
     'IOBA0001948',
+    true,
     true
 ),
 (
-    'e5555555-5555-5555-5555-555555555555',
+    'e5555555-5555-5555-5555-555555555555'::uuid,
+    'e5555555-5555-5555-5555-555555555555'::uuid,
     'AgriHaat Central Admin',
     'admin',
     '+91 98400 00000',
@@ -335,17 +530,19 @@ VALUES
     '560001',
     12.9716,
     77.5946,
+    'A',
     '•••• •••• •••• 0001',
     'SBIN0000001',
+    true,
     true
 );
 
--- 2. Insert 8 Produce Listings with Realistic Pricing Realization
+-- 2. Insert 8 Produce Listings with Realistic Pricing & Margin Realization
 INSERT INTO produce_listings (id, farmer_id, product_name, product_name_hi, category, grade, price_per_kg, buyer_price_per_kg, farmer_realization_per_kg, estimated_logistics_per_kg, platform_fee_per_kg, available_quantity, total_quantity, unit, location, pincode, lat, lng, harvest_date, image_url, status)
 VALUES 
 (
-    '11111111-0001-0000-0000-000000000001',
-    'a1111111-1111-1111-1111-111111111111',
+    '11111111-0001-0000-0000-000000000001'::uuid,
+    'a1111111-1111-1111-1111-111111111111'::uuid,
     'Tomatoes (Grade A)',
     'टमाटर (ग्रेड A)',
     'Vegetables',
@@ -367,8 +564,8 @@ VALUES
     'ACTIVE'
 ),
 (
-    '11111111-0002-0000-0000-000000000002',
-    'd4444444-4444-4444-4444-444444444444',
+    '11111111-0002-0000-0000-000000000002'::uuid,
+    'd4444444-4444-4444-4444-444444444444'::uuid,
     'Red Onions (Grade A)',
     'लाल प्याज (ग्रेड A)',
     'Vegetables',
@@ -390,8 +587,8 @@ VALUES
     'ACTIVE'
 ),
 (
-    '11111111-0003-0000-0000-000000000003',
-    'a1111111-1111-1111-1111-111111111111',
+    '11111111-0003-0000-0000-000000000003'::uuid,
+    'a1111111-1111-1111-1111-111111111111'::uuid,
     'Baby Potatoes (Grade A)',
     'छोटे आलू (ग्रेड A)',
     'Vegetables',
@@ -413,8 +610,8 @@ VALUES
     'ACTIVE'
 ),
 (
-    '11111111-0004-0000-0000-000000000004',
-    'd4444444-4444-4444-4444-444444444444',
+    '11111111-0004-0000-0000-000000000004'::uuid,
+    'd4444444-4444-4444-4444-444444444444'::uuid,
     'Green Chillies (G4 Fresh)',
     'हरी मिर्च (G4 ताज़ा)',
     'Vegetables',
@@ -436,8 +633,8 @@ VALUES
     'ACTIVE'
 ),
 (
-    '11111111-0005-0000-0000-000000000005',
-    'a1111111-1111-1111-1111-111111111111',
+    '11111111-0005-0000-0000-000000000005'::uuid,
+    'a1111111-1111-1111-1111-111111111111'::uuid,
     'Basmati Rice (Pusa 1121)',
     'बासमती चावल (पूसा 1121)',
     'Grains',
@@ -457,13 +654,82 @@ VALUES
     CURRENT_DATE - INTERVAL '5 days',
     '/placeholder.jpg',
     'ACTIVE'
+),
+(
+    '11111111-0006-0000-0000-000000000006'::uuid,
+    'd4444444-4444-4444-4444-444444444444'::uuid,
+    'Fresh Cabbage (Green Head)',
+    'पत्तागोभी (हरी)',
+    'Vegetables',
+    'A',
+    18.00,
+    22.00,
+    18.00,
+    3.00,
+    1.00,
+    900.00,
+    1500.00,
+    'kg',
+    'Walajabad, Tamil Nadu',
+    '631605',
+    12.8120,
+    79.8240,
+    CURRENT_DATE - INTERVAL '1 day',
+    '/placeholder.jpg',
+    'ACTIVE'
+),
+(
+    '11111111-0007-0000-0000-000000000007'::uuid,
+    'a1111111-1111-1111-1111-111111111111'::uuid,
+    'Ooty Carrots (Grade A)',
+    'ऊटी गाजर (ग्रेड A)',
+    'Vegetables',
+    'A',
+    42.00,
+    47.00,
+    42.00,
+    4.00,
+    1.00,
+    600.00,
+    1000.00,
+    'kg',
+    'Kanchipuram, Tamil Nadu',
+    '631501',
+    12.8342,
+    79.7036,
+    CURRENT_DATE - INTERVAL '2 days',
+    '/placeholder.jpg',
+    'ACTIVE'
+),
+(
+    '11111111-0008-0000-0000-000000000008'::uuid,
+    'd4444444-4444-4444-4444-444444444444'::uuid,
+    'Cavendish Bananas (Robusta)',
+    'केला (रोबस्टा)',
+    'Fruits',
+    'A',
+    25.00,
+    29.00,
+    25.00,
+    3.00,
+    1.00,
+    1500.00,
+    2500.00,
+    'kg',
+    'Walajabad, Tamil Nadu',
+    '631605',
+    12.8120,
+    79.8240,
+    CURRENT_DATE,
+    '/placeholder.jpg',
+    'ACTIVE'
 );
 
 -- 3. Insert 3 Operational Procurement Centres (PS 26032)
 INSERT INTO procurement_centres (id, centre_code, name, name_hi, district, address, pincode, lat, lng, available_slots_today, current_queue_count, avg_wait_time_minutes, now_serving_token, status)
 VALUES 
 (
-    '22222222-0001-0000-0000-000000000001',
+    '22222222-0001-0000-0000-000000000001'::uuid,
     'PROC-CTR-KCH-01',
     'Kanchipuram District Procurement Centre',
     'कांचीपुरम जिला खरीद केंद्र',
@@ -479,7 +745,7 @@ VALUES
     'Open'
 ),
 (
-    '22222222-0002-0000-0000-000000000002',
+    '22222222-0002-0000-0000-000000000002'::uuid,
     'PROC-CTR-WLJ-02',
     'Walajabad Regulated Market & QC Centre',
     'वालाजाबाद विनियमित मंडी खरीद केंद्र',
@@ -495,7 +761,7 @@ VALUES
     'Open'
 ),
 (
-    '22222222-0003-0000-0000-000000000003',
+    '22222222-0003-0000-0000-000000000003'::uuid,
     'PROC-CTR-CPT-03',
     'Chengalpattu Collection & Cold Chain Hub',
     'चेंगलपट्टू संग्रह एवं कोल्ड चेन हब',
@@ -511,14 +777,14 @@ VALUES
     'Crowded'
 );
 
--- 4. Insert Token #42 Active Digital Queue Booking (PS 26032)
+-- 4. Insert Active Digital Queue Bookings (PS 26032)
 INSERT INTO procurement_bookings (id, booking_code, centre_id, farmer_id, farmer_name, farmer_phone, token_number, booking_date, time_slot, produce_name, expected_quantity_kg, accepted_quantity_kg, rate_per_kg, payment_amount, payment_status, payment_ref, status, estimated_wait_minutes, farmers_ahead, qr_code_url)
 VALUES 
 (
-    '33333333-0001-0000-0000-000000000001',
+    '33333333-0001-0000-0000-000000000001'::uuid,
     'FM-PROC-00421',
-    '22222222-0001-0000-0000-000000000001',
-    'a1111111-1111-1111-1111-111111111111',
+    '22222222-0001-0000-0000-000000000001'::uuid,
+    'a1111111-1111-1111-1111-111111111111'::uuid,
     'Ramesh Kumar',
     '+91 98401 23456',
     42,
@@ -537,10 +803,10 @@ VALUES
     'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=AGRIHAAT-PROC-TOKEN-42'
 ),
 (
-    '33333333-0002-0000-0000-000000000002',
+    '33333333-0002-0000-0000-000000000002'::uuid,
     'FM-PROC-00422',
-    '22222222-0002-0000-0000-000000000002',
-    'd4444444-4444-4444-4444-444444444444',
+    '22222222-0002-0000-0000-000000000002'::uuid,
+    'd4444444-4444-4444-4444-444444444444'::uuid,
     'Suresh Reddy',
     '+91 94400 88776',
     21,
@@ -559,13 +825,13 @@ VALUES
     'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=AGRIHAAT-PROC-TOKEN-21'
 );
 
--- 5. Insert Realistic Bulk Orders & Farmer Payables (PS 26033)
+-- 5. Insert Realistic Bulk Orders & Direct Farmer Realizations (PS 26033)
 INSERT INTO orders (id, order_number, buyer_id, buyer_name, buyer_organization, buyer_phone, delivery_address, delivery_city, delivery_pincode, delivery_lat, delivery_lng, total_quantity_kg, total_buyer_amount, total_logistics_fee, total_platform_fee, total_farmer_payable, payment_status, payment_ref, status, pickup_scheduled_at, estimated_delivery_at)
 VALUES 
 (
-    '44444444-0001-0000-0000-000000000001',
+    '44444444-0001-0000-0000-000000000001'::uuid,
     'FM-2026-00421',
-    'b2222222-2222-2222-2222-222222222222',
+    'b2222222-2222-2222-2222-222222222222'::uuid,
     'Anita Rao',
     'ABC Grand Hotels & Restaurants',
     '+91 97100 88990',
@@ -586,9 +852,9 @@ VALUES
     NOW() + INTERVAL '18 hours'
 ),
 (
-    '44444444-0002-0000-0000-000000000002',
+    '44444444-0002-0000-0000-000000000002'::uuid,
     'FM-2026-00398',
-    'b2222222-2222-2222-2222-222222222222',
+    'b2222222-2222-2222-2222-222222222222'::uuid,
     'Anita Rao',
     'ABC Grand Hotels & Restaurants',
     '+91 97100 88990',
@@ -613,10 +879,10 @@ VALUES
 INSERT INTO order_allocations (id, order_id, listing_id, farmer_id, farmer_name, fpo_name, allocated_quantity_kg, rate_per_kg, farmer_realization, pickup_location, pickup_pincode, status)
 VALUES 
 (
-    '55555555-0001-0000-0000-000000000001',
-    '44444444-0001-0000-0000-000000000001',
-    '11111111-0001-0000-0000-000000000001',
-    'a1111111-1111-1111-1111-111111111111',
+    '55555555-0001-0000-0000-000000000001'::uuid,
+    '44444444-0001-0000-0000-000000000001'::uuid,
+    '11111111-0001-0000-0000-000000000001'::uuid,
+    'a1111111-1111-1111-1111-111111111111'::uuid,
     'Ramesh Kumar',
     'ABC Farmer Producer Organization',
     300.00,
@@ -627,10 +893,10 @@ VALUES
     'Pickup Scheduled'
 ),
 (
-    '55555555-0002-0000-0000-000000000002',
-    '44444444-0001-0000-0000-000000000001',
-    '11111111-0002-0000-0000-000000000002',
-    'd4444444-4444-4444-4444-444444444444',
+    '55555555-0002-0000-0000-000000000002'::uuid,
+    '44444444-0001-0000-0000-000000000001'::uuid,
+    '11111111-0002-0000-0000-000000000002'::uuid,
+    'd4444444-4444-4444-4444-444444444444'::uuid,
     'Suresh Reddy',
     'GreenFields Farmer Producer Co.',
     200.00,
@@ -641,11 +907,11 @@ VALUES
     'Pickup Scheduled'
 );
 
--- 7. Insert Aggregated Logistics Route (124 km multi-stop route)
+-- 7. Insert Aggregated Logistics Route (124 km route, Reefer tracking)
 INSERT INTO logistics_routes (id, route_code, carrier_name, vehicle_number, driver_name, driver_phone, total_distance_km, distance_saved_km, estimated_duration, total_weight_kg, capacity_kg, status, reefer_temperature_celsius)
 VALUES 
 (
-    '66666666-0001-0000-0000-000000000001',
+    '66666666-0001-0000-0000-000000000001'::uuid,
     'RT-KCH-CHE-01',
     'AgriHaat Green Logistics',
     'TN-21-CA-4892',
@@ -664,7 +930,7 @@ VALUES
 INSERT INTO demand_forecasts (id, product_name, region, forecast_period, expected_demand_kg, change_percent, confidence_percent, recommendation, recommendation_hi, factors)
 VALUES 
 (
-    '77777777-0001-0000-0000-000000000001',
+    '77777777-0001-0000-0000-000000000001'::uuid,
     'Tomatoes (Grade A)',
     'Chennai Metropolitan Region',
     'Next 7 Days',
@@ -676,7 +942,7 @@ VALUES
     '{"festival_demand": "High", "wholesale_supply_gap": "14%", "weather_risk": "Low"}'::jsonb
 ),
 (
-    '77777777-0002-0000-0000-000000000002',
+    '77777777-0002-0000-0000-000000000002'::uuid,
     'Red Onions (Grade A)',
     'Kanchipuram & Chengalpattu',
     'Next 14 Days',
@@ -692,8 +958,8 @@ VALUES
 INSERT INTO notifications (id, user_id, title, title_hi, message, message_hi, category, read, link)
 VALUES 
 (
-    '88888888-0001-0000-0000-000000000001',
-    'a1111111-1111-1111-1111-111111111111',
+    '88888888-0001-0000-0000-000000000001'::uuid,
+    'a1111111-1111-1111-1111-111111111111'::uuid,
     'Bulk Order Allocated: 500 kg Tomatoes',
     'थोक ऑर्डर आवंटित: 500 किग्रा टमाटर',
     'ABC Grand Hotels Chennai confirmed Order #FM-2026-00421. Pickup scheduled tomorrow at 08:30 AM.',
@@ -703,8 +969,8 @@ VALUES
     '/farmer/orders'
 ),
 (
-    '88888888-0002-0000-0000-000000000002',
-    'a1111111-1111-1111-1111-111111111111',
+    '88888888-0002-0000-0000-000000000002'::uuid,
+    'a1111111-1111-1111-1111-111111111111'::uuid,
     'Procurement Slot Token #42 Active',
     'खरीद टोकन #42 सक्रिय',
     'Kanchipuram Centre is currently serving Token #34. Estimated wait time: 42 minutes.',

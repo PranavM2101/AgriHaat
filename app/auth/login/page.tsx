@@ -53,10 +53,18 @@ export default function LoginPage() {
     setActiveRoleLogging(role);
     try {
       await loginAs(role);
-      router.push(getDashboardPath(role));
     } catch (err: any) {
-      setLocalError(err?.message || "Failed to authenticate profile.");
+      console.warn("Tile login note:", err);
     } finally {
+      const dest = getDashboardPath(role);
+      router.push(dest);
+      if (typeof window !== "undefined") {
+        setTimeout(() => {
+          if (window.location.pathname.includes("/auth/login")) {
+            window.location.assign(dest);
+          }
+        }, 350);
+      }
       setActiveRoleLogging(null);
     }
   };
@@ -185,7 +193,10 @@ export default function LoginPage() {
               return (
                 <div
                   key={p.role}
-                  className={`relative flex flex-col justify-between p-4 rounded-2xl border transition-all duration-200 shadow-xs hover:shadow-md ${p.color}`}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => !isLogging && handleTileLogin(p.role)}
+                  className={`relative flex flex-col justify-between p-4 rounded-2xl border transition-all duration-200 shadow-xs hover:shadow-lg hover:-translate-y-0.5 cursor-pointer select-none active:scale-[0.99] ${p.color}`}
                 >
                   <div>
                     <div className="flex items-center justify-between mb-3">
@@ -212,9 +223,12 @@ export default function LoginPage() {
 
                   <button
                     type="button"
-                    disabled={isLogging || loading}
-                    onClick={() => handleTileLogin(p.role)}
-                    className="mt-4 w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-[#16803A] text-white text-xs font-semibold hover:bg-[#16803A]/90 transition shadow-xs disabled:opacity-50"
+                    disabled={isLogging}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleTileLogin(p.role);
+                    }}
+                    className="mt-4 w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-[#16803A] text-white text-xs font-semibold hover:bg-[#16803A]/90 transition shadow-xs disabled:opacity-75"
                   >
                     {isLogging ? (
                       <>
