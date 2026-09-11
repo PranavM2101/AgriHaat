@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { ChevronDown, Check, User, ShoppingBag, Truck, Shield } from "lucide-react";
 import { useAuth, UserRole } from "@/components/auth/auth-context";
 
@@ -33,10 +33,20 @@ const ROLE_CONFIG: Record<
 
 export function RoleSwitcherBadge() {
   const router = useRouter();
+  const pathname = usePathname();
   const { user, loginAsDemo } = useAuth();
   const [open, setOpen] = useState(false);
 
-  const activeRole: UserRole = user?.role || "farmer";
+  // Infer active role from current URL path if user state is out of sync
+  const getRoleFromPath = (): UserRole => {
+    if (pathname.startsWith("/buyer")) return "buyer";
+    if (pathname.startsWith("/logistics") || pathname.startsWith("/procurement-center")) return "hub";
+    if (pathname.startsWith("/admin")) return "admin";
+    if (pathname.startsWith("/farmer")) return "farmer";
+    return user?.role || "farmer";
+  };
+
+  const activeRole: UserRole = getRoleFromPath();
   const currentConfig = ROLE_CONFIG[activeRole] || ROLE_CONFIG.farmer;
   const ActiveIcon = currentConfig.icon;
 

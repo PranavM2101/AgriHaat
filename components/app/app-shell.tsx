@@ -24,7 +24,7 @@ import {
   Layers,
   Sparkles,
 } from "lucide-react";
-import { useAuth } from "@/components/auth/auth-context";
+import { useAuth, UserRole } from "@/components/auth/auth-context";
 import { useLanguage, LanguageSwitcher } from "@/components/site/language-context";
 import { RoleSwitcherBadge } from "./role-switcher";
 import { NotificationDrawer } from "./notification-drawer";
@@ -45,7 +45,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [aiChatOpen, setAiChatOpen] = useState(false);
 
-  const role = user?.role || "farmer";
+  // Infer role from current URL path if user state is out of sync
+  const getRoleFromPath = (): UserRole => {
+    if (pathname.startsWith("/buyer")) return "buyer";
+    if (pathname.startsWith("/logistics") || pathname.startsWith("/procurement-center")) return "hub";
+    if (pathname.startsWith("/admin")) return "admin";
+    if (pathname.startsWith("/farmer")) return "farmer";
+    return user?.role || "farmer";
+  };
+
+  const role: UserRole = user?.role || getRoleFromPath();
 
   // Dynamic Navigation Links tailored strictly to each Role
   const getNavLinks = (): NavItem[] => {
@@ -102,6 +111,48 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   const navLinks = getNavLinks();
 
+  const getPersonaName = () => {
+    if (user?.name) return user.name;
+    switch (role) {
+      case "buyer":
+        return "Anita Rao";
+      case "hub":
+        return "Murugan S.";
+      case "admin":
+        return "AgriHaat Admin";
+      default:
+        return "Ramesh Kumar";
+    }
+  };
+
+  const getPersonaOrg = () => {
+    if (user?.organization) return user.organization;
+    switch (role) {
+      case "buyer":
+        return "ABC Grand Hotels & Restaurants";
+      case "hub":
+        return "Kanchipuram Collection Hub";
+      case "admin":
+        return "AgriHaat Operations";
+      default:
+        return "ABC FPO";
+    }
+  };
+
+  const getAvatarLetter = () => {
+    if (user?.avatarLetter) return user.avatarLetter;
+    switch (role) {
+      case "buyer":
+        return "A";
+      case "hub":
+        return "M";
+      case "admin":
+        return "F";
+      default:
+        return "R";
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#FAFAF7] text-[#172019] flex">
       {/* ─── Desktop Sidebar ─── */}
@@ -120,19 +171,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </Link>
         </div>
 
-        {/* User Persona Chip (Role-Synced Fallbacks) */}
+        {/* User Persona Chip */}
         <div className="p-4 border-b border-[#E2E7E2] bg-[#FAFAF7]">
           <div className="flex items-center gap-3">
             <div className="grid size-9 place-items-center rounded-full bg-[#16803A] text-white font-bold text-sm shadow-xs">
-              {user?.avatarLetter || (role === "buyer" ? "A" : role === "hub" ? "M" : "R")}
+              {getAvatarLetter()}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-bold text-[#172019] truncate">
-                {user?.name || (role === "buyer" ? "Anita Rao" : role === "hub" ? "Murugan S." : "Ramesh Kumar")}
-              </p>
-              <p className="text-[11px] text-[#687D6B] truncate">
-                {user?.organization || (role === "buyer" ? "Grand Hotels & Retail" : role === "hub" ? "Central Collection Hub" : "ABC FPO")}
-              </p>
+              <p className="text-xs font-bold text-[#172019] truncate">{getPersonaName()}</p>
+              <p className="text-[11px] text-[#687D6B] truncate">{getPersonaOrg()}</p>
             </div>
           </div>
         </div>

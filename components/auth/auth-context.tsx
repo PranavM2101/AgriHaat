@@ -89,11 +89,24 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<UserProfile | null>(null);
+  const [user, setUser] = useState<UserProfile | null>(() => {
+    if (typeof window !== "undefined") {
+      const activeSession = localStorage.getItem("f2m_active_user");
+      if (activeSession) {
+        try {
+          return JSON.parse(activeSession);
+        } catch (e) {
+          console.error("Failed to restore session", e);
+        }
+      }
+    }
+    return DEMO_PROFILES.farmer;
+  });
+
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== "undefined" && window.location.pathname !== "/") {
+    if (typeof window !== "undefined") {
       const activeSession = localStorage.getItem("f2m_active_user");
       if (activeSession) {
         try {
@@ -114,7 +127,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       verified: true,
     };
 
-    // Store in user database array
     const existingUsersRaw = localStorage.getItem("f2m_registered_users");
     const registeredUsers: UserProfile[] = existingUsersRaw ? JSON.parse(existingUsersRaw) : [];
     registeredUsers.push(newUser);
@@ -146,12 +158,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const loginAsDemo = (role: UserRole) => {
     const demoUser = DEMO_PROFILES[role];
     setUser(demoUser);
-    localStorage.setItem("f2m_active_user", JSON.stringify(demoUser));
+    if (typeof window !== "undefined") {
+      localStorage.setItem("f2m_active_user", JSON.stringify(demoUser));
+    }
   };
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem("f2m_active_user");
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("f2m_active_user");
+    }
   };
 
   return (
