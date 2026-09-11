@@ -62,7 +62,7 @@ export default function FarmerProducePage() {
             item.productName.toLowerCase().includes("rice") ||
             item.productName.toLowerCase().includes("basmati")
               ? "/basmati.jpg"
-              : item.image;
+              : item.imageUrl || (item as any).image || "/tomatoes-market.png";
 
           return (
             <div
@@ -117,7 +117,7 @@ export default function FarmerProducePage() {
                     <div className="flex justify-between">
                       <span>Availability Window:</span>
                       <span className="font-medium text-[#172019]">
-                        {item.availabilityWindow.from} – {item.availabilityWindow.to}
+                        {item.availabilityWindow ? `${item.availabilityWindow.from} – ${item.availabilityWindow.to}` : "Open"}
                       </span>
                     </div>
                   </div>

@@ -27,7 +27,7 @@ const PRODUCE_OPTIONS = [
   { id: "tomato", name: "Tomatoes", nameHi: "टमाटर", image: "/tomatoes-market.png", category: "Vegetables" as const },
   { id: "onion", name: "Red Onions", nameHi: "लाल प्याज", image: "/onion.jpg", category: "Vegetables" as const },
   { id: "potato", name: "Potatoes", nameHi: "आलू", image: "/potato.jpg", category: "Vegetables" as const },
-  { id: "rice", name: "Basmati Rice", nameHi: "बासमती चावल", image: "/placeholder.svg", category: "Grains" as const },
+  { id: "rice", name: "Basmati Rice", nameHi: "बासमती चावल", image: "/basmati.jpg", category: "Grains" as const },
   { id: "wheat", name: "Sharbati Wheat", nameHi: "शरबती गेहूं", image: "/placeholder.svg", category: "Grains" as const },
   { id: "groundnut", name: "Groundnut", nameHi: "मूंगफली", image: "/placeholder.svg", category: "Pulses" as const },
 ];

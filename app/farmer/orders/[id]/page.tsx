@@ -16,7 +16,7 @@ import {
   DollarSign,
 } from "lucide-react";
 import { AppShell } from "@/components/app/app-shell";
-import { OrderService } from "@/lib/services";
+import { OrderService, ReportService } from "@/lib/services";
 import { type Order, type OrderStatus } from "@/lib/store";
 import { useLanguage, rupees } from "@/components/site/language-context";
 
@@ -98,13 +98,13 @@ export default function OrderStatusDetailPage({ params }: { params: Promise<{ id
               </p>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={() => setShowInvoiceModal(true)}
-                className="flex items-center gap-1.5 rounded-full border border-[#E2E7E2] px-4 py-2 text-xs font-bold text-[#172019] hover:bg-[#EEF7EF] transition"
+                onClick={() => ReportService.downloadOrderInvoice(order)}
+                className="flex items-center gap-1.5 rounded-full border border-[#16803A] bg-[#EEF7EF] px-4 py-2 text-xs font-bold text-[#16803A] hover:bg-[#16803A] hover:text-white transition shadow-xs"
               >
-                <FileText className="size-3.5 text-[#16803A]" /> View Invoice
+                <FileText className="size-3.5" /> Download Tax Invoice
               </button>
               <div className="rounded-2xl border border-[#16803A]/20 bg-[#EEF7EF] px-4 py-2 text-right">
                 <span className="text-[10px] text-[#687D6B]">Realization</span>

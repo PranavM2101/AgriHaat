@@ -5,6 +5,7 @@ import { Bell, X, CheckCheck, ExternalLink, Calendar, ShoppingBag, TrendingUp, D
 import { NotificationService } from "@/lib/services";
 import { useLanguage } from "@/components/site/language-context";
 import { useAuth } from "@/components/auth/auth-context";
+import type { AppNotification } from "@/lib/store";
 import Link from "next/link";
 
 export function NotificationDrawer() {
@@ -32,7 +33,7 @@ export function NotificationDrawer() {
 
   const handleMarkAllRead = async () => {
     await NotificationService.markAllAsRead();
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    setAllNotifications((prev: AppNotification[]) => prev.map((n: AppNotification) => ({ ...n, read: true })));
   };
 
   const getIcon = (cat: AppNotification["category"]) => {

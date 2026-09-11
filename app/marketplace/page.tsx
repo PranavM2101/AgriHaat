@@ -166,7 +166,7 @@ export default function MarketplacePage() {
                 item.productName.toLowerCase().includes("rice") ||
                 item.productName.toLowerCase().includes("basmati")
                   ? "/basmati.jpg"
-                  : item.image;
+                  : item.imageUrl || (item as any).image || "/tomatoes-market.png";
 
               return (
                 <div

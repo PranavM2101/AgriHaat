@@ -45,14 +45,19 @@ export const produceListings = [
     image: "/potato.jpg",
   },
   {
-  id: "rice", // or "prod-4" / "basmati-rice"
-  name: "Basmati Rice",
-  nameHi: "बासमती चावल",
-  category: "Grains",
-  // Ensure this points to /basmati.jpg
-  image: "/basmati.jpg", 
-  // ... other properties
-},
+    id: "rice",
+    name: "Basmati Rice",
+    nameHi: "बासमती चावल",
+    grade: "A",
+    quantity: 1500,
+    unit: "kg",
+    price: 58,
+    location: "Dehradun / Karnal",
+    seller: "Tarai Farmers Producer Co.",
+    verified: true,
+    harvest: "25 Aug 2026",
+    image: "/basmati.jpg",
+  },
 ] as const;
 
 export const demandForecast = {

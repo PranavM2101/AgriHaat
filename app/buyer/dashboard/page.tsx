@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Layers,
@@ -14,16 +14,44 @@ import {
   Clock,
   Sparkles,
   CheckCircle2,
+  Loader2,
 } from "lucide-react";
 import { AppShell } from "@/components/app/app-shell";
 import { useAuth } from "@/components/auth/auth-context";
 import { useLanguage, rupees } from "@/components/site/language-context";
-import { buyerOrder, INITIAL_DEMAND_FORECAST } from "@/lib/store";
+import { OrderService, MarketplaceService, ForecastService } from "@/lib/services";
+import type { Order, ProduceListing } from "@/lib/store";
 
 export default function BuyerDashboardPage() {
   const { user } = useAuth();
   const { lang, t } = useLanguage();
   const buyerName = user?.name?.split(" ")[0] || "Anita";
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [listings, setListings] = useState<ProduceListing[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadBuyerData() {
+      setLoading(true);
+      try {
+        const [fetchedOrders, fetchedListings] = await Promise.all([
+          OrderService.getOrders(),
+          MarketplaceService.getListings(),
+        ]);
+        setOrders(fetchedOrders);
+        setListings(fetchedListings);
+      } catch (err) {
+        console.error("Error loading buyer dashboard data:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadBuyerData();
+  }, []);
+
+  const activeOrders = orders.filter((o) => o.status !== "Delivered" && o.status !== "Completed" && o.status !== "Cancelled");
+  const totalSpend = orders.reduce((sum, o) => sum + (o.totalBuyerAmount || 0), 0);
+  const totalQtyKg = orders.reduce((sum, o) => sum + (o.totalQuantityKg || 0), 0);
 
   return (
     <AppShell>

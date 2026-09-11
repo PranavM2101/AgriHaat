@@ -16,7 +16,7 @@ import {
   Layers,
 } from "lucide-react";
 import { AppShell } from "@/components/app/app-shell";
-import { ProcurementService } from "@/lib/services";
+import { ProcurementService, ReportService } from "@/lib/services";
 import { type ProcurementBooking } from "@/lib/store";
 import { useLanguage, rupees } from "@/components/site/language-context";
 
@@ -72,9 +72,20 @@ export default function ProcurementStatusDetailPage({ params }: { params: Promis
               </div>
             </div>
 
-            <div className="rounded-2xl border border-[#16803A]/20 bg-[#EEF7EF] px-4 py-3 text-center sm:text-right">
-              <span className="text-[11px] text-[#687D6B]">Current Status</span>
-              <p className="font-bold text-sm text-[#16803A]">{booking.status}</p>
+            <div className="flex flex-col sm:flex-row items-center gap-3">
+              <div className="rounded-2xl border border-[#16803A]/20 bg-[#EEF7EF] px-4 py-3 text-center sm:text-right">
+                <span className="text-[11px] text-[#687D6B]">Current Status</span>
+                <p className="font-bold text-sm text-[#16803A]">{booking.status}</p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => ReportService.downloadProcurementTokenSlip(booking)}
+                className="inline-flex items-center gap-1.5 rounded-full border border-[#16803A] bg-[#16803A] px-4 py-3 text-xs font-bold text-white hover:bg-[#16803A]/90 transition shadow-xs"
+              >
+                <FileText className="size-3.5" />
+                <span>Download Gate Pass</span>
+              </button>
             </div>
           </div>
 

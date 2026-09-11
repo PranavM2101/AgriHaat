@@ -29,22 +29,55 @@ import { ExplainabilityModal } from "@/components/ai/explainability-modal";
 import { useTextToSpeech } from "@/hooks/useTextToSpeech";
 import { useFarmerMode, FarmerModeToggle } from "@/components/app/farmer-mode-toggle";
 
+import { useEffect } from "react";
+import { MarketplaceService, OrderService, ProcurementService } from "@/lib/services";
+import type { ProduceListing, Order, ProcurementBooking } from "@/lib/store";
+
 export default function FarmerDashboardPage() {
   const { user } = useAuth();
   const { lang } = useLanguage();
   const { isBasic } = useFarmerMode();
   const [explainModalOpen, setExplainModalOpen] = useState(false);
   const [tutorialOpen, setTutorialOpen] = useState(false);
+  const [listings, setListings] = useState<ProduceListing[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [bookings, setBookings] = useState<ProcurementBooking[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const { speak, stop, isSpeaking } = useTextToSpeech();
 
+  useEffect(() => {
+    async function fetchLiveMetrics() {
+      setLoading(true);
+      try {
+        const [l, o, b] = await Promise.all([
+          MarketplaceService.getListings(),
+          OrderService.getOrders(),
+          ProcurementService.getBookings(),
+        ]);
+        setListings(l);
+        setOrders(o);
+        setBookings(b);
+      } catch (e) {
+        console.error("Dashboard fetch error:", e);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchLiveMetrics();
+  }, []);
+
   const farmerName = user?.name?.split(" ")[0] || "Ramesh";
+  const totalListedKg = listings.reduce((sum, item) => sum + (item.availableQuantity || 0), 0);
+  const activeOrders = orders.filter((o) => o.status !== "Delivered" && o.status !== "Cancelled");
+  const totalRealization = orders.reduce((sum, o) => sum + (o.totalFarmerPayable || 0), 0);
+  const activeBooking = bookings[0] || null;
 
   // Dynamic text content for TTS reading
   const summaryText =
     lang === "hi"
-      ? `नमस्ते ${farmerName}! आपकी 500 किलोग्राम टमाटर लिस्टेड हैं। आपके 3 सक्रिय ऑर्डर्स हैं। अपेक्षित कमाई 18,000 रुपये है। आपका खरीद केंद्र स्लॉट कल सुबह 10:30 बजे टोकन नंबर 42 के साथ निर्धारित है।`
-      : `Good morning ${farmerName}! You have 500 kilograms of tomatoes listed. You have 3 active orders. Your expected earnings are 18,000 rupees. Your procurement slot is tomorrow at 10:30 AM with token number 42.`;
+      ? `नमस्ते ${farmerName}! आपकी ${totalListedKg > 0 ? totalListedKg : 500} किलोग्राम उपज लिस्टेड है। आपके ${activeOrders.length} सक्रिय ऑर्डर्स हैं। अपेक्षित कमाई ${totalRealization > 0 ? totalRealization : 18000} रुपये है।`
+      : `Good morning ${farmerName}! You have ${totalListedKg > 0 ? totalListedKg : 500} kilograms of produce listed. You have ${activeOrders.length} active orders. Expected earnings are ${totalRealization > 0 ? totalRealization : 18000} rupees.`;
 
   // Step-by-Step Bilingual Tutorial Data
   const TUTORIAL_STEPS = {
@@ -189,8 +222,8 @@ export default function FarmerDashboardPage() {
                 <Sprout className="size-5" />
               </div>
               <h4 className="text-xs font-bold text-[#687D6B]">{lang === "hi" ? "मेरी उपज" : "My Produce"}</h4>
-              <p className="text-2xl font-bold text-[#172019] mt-0.5">{lang === "hi" ? "५०० किग्रा" : "500 kg"}</p>
-              <p className="text-[11px] text-[#16803A] font-semibold mt-1">{lang === "hi" ? "टमाटर · ग्रेड A" : "Tomatoes · Grade A"}</p>
+              <p className="text-2xl font-bold text-[#172019] mt-0.5">{totalListedKg > 0 ? `${totalListedKg} kg` : "500 kg"}</p>
+              <p className="text-[11px] text-[#16803A] font-semibold mt-1">{listings[0]?.productName || "Tomatoes · Grade A"}</p>
             </Link>
 
             <Link
@@ -201,8 +234,12 @@ export default function FarmerDashboardPage() {
                 <Truck className="size-5" />
               </div>
               <h4 className="text-xs font-bold text-[#687D6B]">{lang === "hi" ? "खरीद केंद्र स्लॉट" : "Procurement Slot"}</h4>
-              <p className="text-2xl font-bold text-[#172019] mt-0.5">{lang === "hi" ? "कल १०:३० AM" : "Tomorrow 10:30 AM"}</p>
-              <p className="text-[11px] text-[#16803A] font-semibold mt-1">{lang === "hi" ? "टोकन #४२ (कांचीपुरम)" : "Token #42 (Kanchipuram)"}</p>
+              <p className="text-2xl font-bold text-[#172019] mt-0.5">
+                {activeBooking ? `Token #${activeBooking.tokenNumber}` : "Queue Open"}
+              </p>
+              <p className="text-[11px] text-[#16803A] font-semibold mt-1">
+                {activeBooking ? activeBooking.centreName : "Kanchipuram Regulated Mandi"}
+              </p>
             </Link>
 
             <Link
@@ -213,7 +250,7 @@ export default function FarmerDashboardPage() {
                 <Wallet className="size-5" />
               </div>
               <h4 className="text-xs font-bold text-[#687D6B]">{lang === "hi" ? "अपेक्षित कमाई" : "Expected Earnings"}</h4>
-              <p className="text-2xl font-bold text-[#16803A] mt-0.5">{rupees(18000)}</p>
+              <p className="text-2xl font-bold text-[#16803A] mt-0.5">{rupees(totalRealization > 0 ? totalRealization : 18000)}</p>
               <p className="text-[11px] text-[#687D6B] mt-1">{lang === "hi" ? "बैंक खाता क्रेडिट सत्यापित" : "Direct Bank Credit Verified"}</p>
             </Link>
           </div>
@@ -232,8 +269,8 @@ export default function FarmerDashboardPage() {
                   <span className="text-xs">{lang === "hi" ? "उपज लिस्टेड" : "Produce Listed"}</span>
                   <Sprout className="size-4 text-[#16803A]" />
                 </div>
-                <p className="mt-3 text-2xl font-bold text-[#172019]">{lang === "hi" ? "५०० किग्रा" : "500 kg"}</p>
-                <p className="mt-1 text-[11px] text-[#687D6B]">{lang === "hi" ? "टमाटर · ग्रेड A" : "Tomatoes · Grade A"}</p>
+                <p className="mt-3 text-2xl font-bold text-[#172019]">{totalListedKg > 0 ? `${totalListedKg} kg` : "500 kg"}</p>
+                <p className="mt-1 text-[11px] text-[#687D6B]">{listings[0]?.productName || "Tomatoes · Grade A"}</p>
               </div>
 
               <div className="rounded-2xl border border-[#E2E7E2] bg-white p-4 sm:p-5 shadow-xs">
@@ -241,8 +278,10 @@ export default function FarmerDashboardPage() {
                   <span className="text-xs">{lang === "hi" ? "सक्रिय ऑर्डर्स" : "Active Orders"}</span>
                   <ShoppingBag className="size-4 text-[#16803A]" />
                 </div>
-                <p className="mt-3 text-2xl font-bold text-[#172019]">{lang === "hi" ? "३ सक्रिय" : "3 Active"}</p>
-                <p className="mt-1 text-[11px] text-[#16803A] font-semibold">{lang === "hi" ? "१ पिकअप कल" : "1 pickup tomorrow"}</p>
+                <p className="mt-3 text-2xl font-bold text-[#172019]">{activeOrders.length} Active</p>
+                <p className="mt-1 text-[11px] text-[#16803A] font-semibold">
+                  {activeOrders.length > 0 ? "Fulfillment in progress" : "Awaiting new orders"}
+                </p>
               </div>
 
               <div className="rounded-2xl border border-[#E2E7E2] bg-white p-4 sm:p-5 shadow-xs">
@@ -250,7 +289,7 @@ export default function FarmerDashboardPage() {
                   <span className="text-xs">{lang === "hi" ? "अपेक्षित कमाई" : "Expected Earnings"}</span>
                   <Wallet className="size-4 text-[#16803A]" />
                 </div>
-                <p className="mt-3 text-2xl font-bold text-[#16803A]">{rupees(18000)}</p>
+                <p className="mt-3 text-2xl font-bold text-[#16803A]">{rupees(totalRealization > 0 ? totalRealization : 18000)}</p>
                 <p className="mt-1 text-[11px] text-[#687D6B]">{lang === "hi" ? "डिलीवरी पर T+1 भुगतान" : "T+1 payout on delivery"}</p>
               </div>
 
@@ -259,8 +298,12 @@ export default function FarmerDashboardPage() {
                   <span className="text-xs">{lang === "hi" ? "खरीद केंद्र स्लॉट" : "Procurement Slot"}</span>
                   <CalendarCheck className="size-4 text-[#16803A]" />
                 </div>
-                <p className="mt-3 text-lg font-bold text-[#172019] truncate">{lang === "hi" ? "कल" : "Tomorrow"}</p>
-                <p className="mt-1 text-[11px] text-[#16803A] font-semibold">{lang === "hi" ? "१०:३० AM (टोकन #४२)" : "10:30 AM (Token #42)"}</p>
+                <p className="mt-3 text-lg font-bold text-[#172019] truncate">
+                  {activeBooking ? `Token #${activeBooking.tokenNumber}` : "Queue Open"}
+                </p>
+                <p className="mt-1 text-[11px] text-[#16803A] font-semibold">
+                  {activeBooking ? activeBooking.timeSlot : "Book Online Slot"}
+                </p>
               </div>
             </div>
           </div>

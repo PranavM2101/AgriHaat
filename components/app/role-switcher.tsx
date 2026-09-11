@@ -24,6 +24,11 @@ const ROLE_CONFIG: Record<
     icon: Truck,
     route: "/logistics/dashboard",
   },
+  fpo: {
+    label: "FPO Manager",
+    icon: User,
+    route: "/farmer/dashboard",
+  },
   admin: {
     label: "Admin Portal",
     icon: Shield,

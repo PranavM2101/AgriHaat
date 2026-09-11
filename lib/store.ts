@@ -30,27 +30,32 @@ export interface ProduceListing {
   id: string;
   farmerId: string;
   farmerName: string;
-  farmerLocation: string;
+  farmerLocation?: string;
   fpoName?: string;
   productName: string;
-  productNameHi: string;
-  category: "Vegetables" | "Fruits" | "Grains" | "Pulses" | "Spices";
+  productNameHi?: string;
+  category: "Vegetables" | "Fruits" | "Grains" | "Pulses" | "Spices" | string;
   grade: "A" | "B" | "Bulk";
   totalQuantity: number;
   availableQuantity: number;
-  unit: "kg" | "quintal" | "tonne";
+  unit: "kg" | "quintal" | "tonne" | string;
   pricePerKg: number;
   buyerPricePerKg: number;
   estimatedLogisticsPerKg: number;
   platformFeePerKg: number;
   farmerRealizationPerKg: number;
   harvestDate: string;
-  availabilityWindow: { from: string; to: string };
+  availabilityWindow?: { from: string; to: string };
   location: string;
-  district: string;
-  state: string;
+  district?: string;
+  state?: string;
+  pincode?: string;
+  lat?: number;
+  lng?: number;
   verified: boolean;
-  image: string;
+  image?: string;
+  imageUrl?: string;
+  status?: string;
   createdAt: string;
 }
 
@@ -99,19 +104,21 @@ export interface Order {
 export interface ProcurementCentre {
   id: string;
   name: string;
-  nameHi: string;
+  nameHi?: string;
   district: string;
-  state: string;
-  distanceKm: number;
+  state?: string;
+  distanceKm?: number;
   address: string;
-  operatingHours: string;
-  contactNumber: string;
-  availableSlotsToday: number;
-  avgWaitTimeMinutes: number;
-  currentQueueCount: number;
-  nowServingToken: number;
-  status: "Open" | "Closing Soon" | "Closed";
-  supportedProduce: string[];
+  operatingHours?: string;
+  contactNumber?: string;
+  availableSlotsToday?: number;
+  avgWaitTimeMinutes?: number;
+  currentQueueCount?: number;
+  nowServingToken?: number;
+  status: "Open" | "Closing Soon" | "Closed" | string;
+  supportedProduce?: string[];
+  lat?: number;
+  lng?: number;
 }
 
 export interface ProcurementBooking {
@@ -201,13 +208,14 @@ export interface DemandForecastData {
 
 export interface AppNotification {
   id: string;
-  userId: string;
-  role: Role;
+  userId?: string;
+  role?: Role;
   title: string;
-  titleHi: string;
+  titleHi?: string;
   message: string;
-  messageHi: string;
-  category: "ORDER" | "PROCUREMENT" | "PRICE" | "LOGISTICS" | "PAYMENT";
+  messageHi?: string;
+  category?: "ORDER" | "PROCUREMENT" | "PRICE" | "LOGISTICS" | "PAYMENT" | string;
+  type?: string;
   read: boolean;
   timestamp: string;
   link?: string;
