@@ -29,7 +29,19 @@ export default function MarketplacePage() {
   const [selectedGrade, setSelectedGrade] = useState<string>("ALL");
 
   useEffect(() => {
-    MarketplaceService.getListings().then(setListings);
+    MarketplaceService.getListings().then((data) => {
+      // Direct image override to ensure Basmati Rice uses /basmati.jpg
+      const updatedData = data.map((item) => {
+        if (
+          item.productName.toLowerCase().includes("rice") ||
+          item.productName.toLowerCase().includes("basmati")
+        ) {
+          return { ...item, image: "/basmati.jpg" };
+        }
+        return item;
+      });
+      setListings(updatedData);
+    });
   }, []);
 
   const filteredListings = listings.filter((item) => {
@@ -148,77 +160,86 @@ export default function MarketplacePage() {
           </div>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {filteredListings.map((item) => (
-              <div
-                key={item.id}
-                className="overflow-hidden rounded-3xl border border-[#E2E7E2] bg-white shadow-xs transition-all duration-200 hover:shadow-md flex flex-col justify-between"
-              >
-                <div>
-                  <div className="relative h-44 w-full bg-[#EEF7EF]">
-                    <img
-                      src={item.image}
-                      alt={item.productName}
-                      className="h-full w-full object-cover"
-                    />
-                    <span className="absolute left-3 top-3 rounded-full bg-white/95 px-2.5 py-0.5 text-xs font-bold text-[#172019] shadow-xs backdrop-blur-xs">
-                      Grade {item.grade}
-                    </span>
-                    <span className="absolute right-3 top-3 rounded-full bg-[#EEF7EF] px-2 py-0.5 text-[11px] font-bold text-[#16803A] shadow-xs backdrop-blur-xs">
-                      ✓ Verified
-                    </span>
+            {filteredListings.map((item) => {
+              // Ensure rice image is explicitly forced during render
+              const displayImage =
+                item.productName.toLowerCase().includes("rice") ||
+                item.productName.toLowerCase().includes("basmati")
+                  ? "/basmati.jpg"
+                  : item.image;
+
+              return (
+                <div
+                  key={item.id}
+                  className="overflow-hidden rounded-3xl border border-[#E2E7E2] bg-white shadow-xs transition-all duration-200 hover:shadow-md flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="relative h-44 w-full bg-[#EEF7EF]">
+                      <img
+                        src={displayImage}
+                        alt={item.productName}
+                        className="h-full w-full object-cover"
+                      />
+                      <span className="absolute left-3 top-3 rounded-full bg-white/95 px-2.5 py-0.5 text-xs font-bold text-[#172019] shadow-xs backdrop-blur-xs">
+                        Grade {item.grade}
+                      </span>
+                      <span className="absolute right-3 top-3 rounded-full bg-[#EEF7EF] px-2 py-0.5 text-[11px] font-bold text-[#16803A] shadow-xs backdrop-blur-xs">
+                        ✓ Verified
+                      </span>
+                    </div>
+
+                    <div className="p-4 sm:p-5 space-y-3">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <h3 className="font-serif text-lg font-bold text-[#172019]">
+                            {lang === "hi" ? item.productNameHi : item.productName}
+                          </h3>
+                          <p className="text-xs text-[#687D6B]">
+                            Grade {item.grade} · {item.availableQuantity} {item.unit} available
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-[10px] text-[#687D6B]">Buyer Rate</span>
+                          <p className="text-xl font-bold text-[#172019]">
+                            {rupees(item.buyerPricePerKg)}
+                            <span className="text-xs font-normal text-[#687D6B]">/{item.unit}</span>
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-1 text-xs text-[#687D6B] border-t border-[#E2E7E2] pt-2.5">
+                        <div className="flex items-center gap-1.5">
+                          <MapPin className="size-3.5 text-[#16803A]" />
+                          <span>{item.location}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Seller:</span>
+                          <span className="font-medium text-[#172019]">{item.farmerName}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>FPO:</span>
+                          <span className="font-medium text-[#16803A]">{item.fpoName || "Direct"}</span>
+                        </div>
+                      </div>
+
+                      <div className="rounded-xl bg-[#EEF7EF] p-2 text-xs text-[#172019] flex justify-between items-center">
+                        <span className="text-[11px] text-[#687D6B]">Farmer Net:</span>
+                        <span className="font-bold text-[#16803A]">{rupees(item.farmerRealizationPerKg)}/kg</span>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="p-4 sm:p-5 space-y-3">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h3 className="font-serif text-lg font-bold text-[#172019]">
-                          {lang === "hi" ? item.productNameHi : item.productName}
-                        </h3>
-                        <p className="text-xs text-[#687D6B]">
-                          Grade {item.grade} · {item.availableQuantity} {item.unit} available
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-[10px] text-[#687D6B]">Buyer Rate</span>
-                        <p className="text-xl font-bold text-[#172019]">
-                          {rupees(item.buyerPricePerKg)}
-                          <span className="text-xs font-normal text-[#687D6B]">/{item.unit}</span>
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="space-y-1 text-xs text-[#687D6B] border-t border-[#E2E7E2] pt-2.5">
-                      <div className="flex items-center gap-1.5">
-                        <MapPin className="size-3.5 text-[#16803A]" />
-                        <span>{item.location}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Seller:</span>
-                        <span className="font-medium text-[#172019]">{item.farmerName}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>FPO:</span>
-                        <span className="font-medium text-[#16803A]">{item.fpoName || "Direct"}</span>
-                      </div>
-                    </div>
-
-                    <div className="rounded-xl bg-[#EEF7EF] p-2 text-xs text-[#172019] flex justify-between items-center">
-                      <span className="text-[11px] text-[#687D6B]">Farmer Net:</span>
-                      <span className="font-bold text-[#16803A]">{rupees(item.farmerRealizationPerKg)}/kg</span>
-                    </div>
+                  <div className="p-4 border-t border-[#E2E7E2] bg-[#FAFAF7]">
+                    <Link
+                      href={`/marketplace/${item.id}`}
+                      className="flex w-full items-center justify-center gap-1 rounded-full bg-[#16803A] py-2 text-xs font-bold text-white hover:bg-[#16803A]/90 transition"
+                    >
+                      View Listing & Order <ArrowRight className="size-3.5" />
+                    </Link>
                   </div>
                 </div>
-
-                <div className="p-4 border-t border-[#E2E7E2] bg-[#FAFAF7]">
-                  <Link
-                    href={`/marketplace/${item.id}`}
-                    className="flex w-full items-center justify-center gap-1 rounded-full bg-[#16803A] py-2 text-xs font-bold text-white hover:bg-[#16803A]/90 transition"
-                  >
-                    View Listing & Order <ArrowRight className="size-3.5" />
-                  </Link>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

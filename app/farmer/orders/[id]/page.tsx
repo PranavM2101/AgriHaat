@@ -50,8 +50,25 @@ export default function OrderStatusDetailPage({ params }: { params: Promise<{ id
     );
   }
 
-  // Determine active step index
-  const activeStepIdx = order.status === "In Transit" ? 5 : order.status === "Confirmed" ? 1 : 0;
+  // Determine active step index dynamically
+  const activeStepIdx =
+    ORDER_STEPS.findIndex((s) => s.id === order.status) !== -1
+      ? ORDER_STEPS.findIndex((s) => s.id === order.status)
+      : order.status === "In Transit"
+      ? 5
+      : order.status === "Confirmed"
+      ? 1
+      : 0;
+
+  // Extract correct fields from Order schema
+  const quantityKg = order.totalQuantityKg || order.items?.[0]?.quantity || 0;
+  const productName = order.items?.[0]?.productName || "Produce";
+
+  // Calculate per-kg rates dynamically from order object
+  const buyerRatePerKg = quantityKg > 0 ? order.totalBuyerAmount / quantityKg : 0;
+  const logisticsRatePerKg = quantityKg > 0 ? order.totalLogisticsFee / quantityKg : 0;
+  const platformRatePerKg = quantityKg > 0 ? order.totalPlatformFee / quantityKg : 0;
+  const farmerRealizationPerKg = quantityKg > 0 ? order.totalFarmerPayable / quantityKg : 0;
 
   return (
     <AppShell>
@@ -149,24 +166,24 @@ export default function OrderStatusDetailPage({ params }: { params: Promise<{ id
           {/* Price Ledger (7 cols) */}
           <div className="lg:col-span-7 rounded-3xl border border-[#E2E7E2] bg-white p-6 sm:p-8 shadow-xs space-y-5">
             <h3 className="font-serif text-base font-bold text-[#172019]">
-              Itemized Payout Arithmetic (500 kg Tomatoes)
+              Itemized Payout Arithmetic ({quantityKg} kg {productName})
             </h3>
 
             <div className="space-y-3 text-xs">
               <div className="flex justify-between">
-                <span className="text-[#687D6B]">Gross Buyer Amount (₹40/kg):</span>
+                <span className="text-[#687D6B]">Gross Buyer Amount ({rupees(buyerRatePerKg)}/kg):</span>
                 <span className="font-bold text-[#172019]">{rupees(order.totalBuyerAmount)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#687D6B]">Logistics & Transport Fee (₹3/kg):</span>
+                <span className="text-[#687D6B]">Logistics & Transport Fee ({rupees(logisticsRatePerKg)}/kg):</span>
                 <span className="font-medium text-red-600">−{rupees(order.totalLogisticsFee)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#687D6B]">Platform Fee (₹1/kg):</span>
+                <span className="text-[#687D6B]">Platform Fee ({rupees(platformRatePerKg)}/kg):</span>
                 <span className="font-medium text-red-600">−{rupees(order.totalPlatformFee)}</span>
               </div>
               <div className="flex justify-between border-t border-[#E2E7E2] pt-3 text-sm font-bold text-[#16803A]">
-                <span>Guaranteed Net Realization (₹36/kg):</span>
+                <span>Guaranteed Net Realization ({rupees(farmerRealizationPerKg)}/kg):</span>
                 <span>{rupees(order.totalFarmerPayable)}</span>
               </div>
             </div>
@@ -256,8 +273,8 @@ export default function OrderStatusDetailPage({ params }: { params: Promise<{ id
                   <p className="text-[#687D6B]">GSTIN: 33AAACF2026M1Z5</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-bold text-[#172019]">Date: 28 Aug 2026</p>
-                  <p className="text-[#687D6B]">Payment Ref: {order.paymentRef}</p>
+                  <p className="font-bold text-[#172019]">Date: {order.createdAt || "28 Aug 2026"}</p>
+                  <p className="text-[#687D6B]">Payment Ref: {order.paymentRef || "PAY-DEMO-38292"}</p>
                 </div>
               </div>
 
@@ -269,8 +286,8 @@ export default function OrderStatusDetailPage({ params }: { params: Promise<{ id
                 </div>
                 <div>
                   <span className="text-[#687D6B]">Seller (Farmer/FPO):</span>
-                  <p className="font-bold text-[#172019]">{order.allocations[0]?.farmerName || "Ramesh Kumar (ABC FPO)"}</p>
-                  <p>Kanchipuram, Tamil Nadu</p>
+                  <p className="font-bold text-[#172019]">{order.allocations?.[0]?.farmerName || "Suresh Reddy (GreenFields FPO)"}</p>
+                  <p>Nellore, Andhra Pradesh</p>
                 </div>
               </div>
 
@@ -285,10 +302,10 @@ export default function OrderStatusDetailPage({ params }: { params: Promise<{ id
                 </thead>
                 <tbody className="divide-y divide-[#E2E7E2]">
                   <tr>
-                    <td className="py-2.5 font-bold text-[#172019]">Tomatoes (Grade A Harvest Lot)</td>
-                    <td>500 kg</td>
-                    <td>₹40.00</td>
-                    <td className="text-right font-bold">{rupees(20000)}</td>
+                    <td className="py-2.5 font-bold text-[#172019]">{productName}</td>
+                    <td>{quantityKg} kg</td>
+                    <td>{rupees(buyerRatePerKg)}</td>
+                    <td className="text-right font-bold">{rupees(order.totalBuyerAmount)}</td>
                   </tr>
                 </tbody>
               </table>
@@ -296,15 +313,15 @@ export default function OrderStatusDetailPage({ params }: { params: Promise<{ id
               <div className="border-t border-[#E2E7E2] pt-3 space-y-1.5 text-right">
                 <div className="flex justify-between text-[#687D6B]">
                   <span>Logistics Transport Fee (Direct Pass-Through):</span>
-                  <span>−{rupees(1500)}</span>
+                  <span>−{rupees(order.totalLogisticsFee)}</span>
                 </div>
                 <div className="flex justify-between text-[#687D6B]">
                   <span>Platform Facilitation Fee (GST Incl.):</span>
-                  <span>−{rupees(500)}</span>
+                  <span>−{rupees(order.totalPlatformFee)}</span>
                 </div>
                 <div className="flex justify-between font-bold text-base text-[#16803A] border-t border-[#E2E7E2] pt-2">
                   <span>Net Farmer Disbursal Realization:</span>
-                  <span>{rupees(18000)}</span>
+                  <span>{rupees(order.totalFarmerPayable)}</span>
                 </div>
               </div>
             </div>

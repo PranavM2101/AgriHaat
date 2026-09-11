@@ -16,20 +16,23 @@ import { ScrollToTop } from "@/components/landing/scroll-to-top";
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-[#FAFAF7] text-[#172019] selection:bg-[#16803A] selection:text-white">
+    <main className="min-h-screen w-full max-w-full overflow-x-hidden bg-[#FAFAF7] text-[#172019] selection:bg-[#16803A] selection:text-white relative">
       {/* Sticky Navigation */}
       <Navbar />
 
-      {/* 1. Hero Section with realistic product card */}
-      <HeroSection />
+      {/* Hero Section Container with Responsive Padding */}
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* 1. Hero Section with realistic product card */}
+        <HeroSection />
+      </div>
 
-      {/* 2. Proof & Insight Section (Farmer Realization + Demand Outlook) */}
+      {/* 2. Proof & Insight Section */}
       <ProofSection />
 
-      {/* 3. Marketplace Carousel (What's moving today) */}
+      {/* 3. Marketplace Carousel */}
       <MarketplaceCarousel />
 
-      {/* 4. Product Showcase Tabs (Listings, Forecast, Prices, Logistics) */}
+      {/* 4. Product Showcase Tabs */}
       <ProductTabs />
 
       {/* 5. Direct Mandi vs AgriHaat Middlemen Elimination Section */}

@@ -15,20 +15,65 @@ import { AppShell } from "@/components/app/app-shell";
 import { useLanguage, rupees } from "@/components/site/language-context";
 
 const ORDERS_DATA = [
-  { id: "ord-01", orderNumber: "FM-2026-00421", buyer: "ABC Grand Hotels", produce: "Tomatoes (Grade A)", qty: 500, amount: 20000, realization: 18000, city: "Chennai", status: "In Transit", date: "31 Aug 2026" },
-  { id: "ord-02", orderNumber: "FM-2026-00422", buyer: "FreshChoice Hypermarkets", produce: "Red Onions (Grade A)", qty: 2000, amount: 70000, realization: 62000, city: "Chennai", status: "Delivered", date: "30 Aug 2026" },
-  { id: "ord-03", orderNumber: "FM-2026-00423", buyer: "CureFoods Kitchens", produce: "Potatoes (Table Grade)", qty: 800, amount: 25600, realization: 23200, city: "Bengaluru", status: "Aggregating", date: "31 Aug 2026" },
-  { id: "ord-04", orderNumber: "FM-2026-00424", buyer: "Malabar Feast Catering", produce: "Basmati Rice", qty: 1500, amount: 108000, realization: 100500, city: "Kochi", status: "Confirmed", date: "01 Sep 2026" },
+  {
+    id: "ord-01",
+    orderNumber: "FM-2026-00421",
+    buyer: "ABC Grand Hotels",
+    produce: "Tomatoes (Grade A)",
+    qty: 500,
+    amount: 20000,
+    realization: 18000,
+    city: "Chennai",
+    status: "In Transit",
+    date: "31 Aug 2026",
+  },
+  {
+    id: "ord-02",
+    orderNumber: "FM-2026-00422",
+    buyer: "FreshChoice Hypermarkets",
+    produce: "Red Onions (Grade A)",
+    qty: 2000,
+    amount: 70000,
+    realization: 62000,
+    city: "Chennai",
+    status: "Delivered",
+    date: "30 Aug 2026",
+  },
+  {
+    id: "ord-03",
+    orderNumber: "FM-2026-00423",
+    buyer: "CureFoods Kitchens",
+    produce: "Potatoes (Table Grade)",
+    qty: 800,
+    amount: 25600,
+    realization: 23200,
+    city: "Bengaluru",
+    status: "Aggregating",
+    date: "31 Aug 2026",
+  },
+  {
+    id: "ord-04",
+    orderNumber: "FM-2026-00424",
+    buyer: "Malabar Feast Catering",
+    produce: "Basmati Rice",
+    qty: 1500,
+    amount: 93000,
+    realization: 85500,
+    city: "Kochi",
+    status: "Confirmed",
+    date: "01 Sep 2026",
+  },
 ];
 
 export default function AdminOrdersPage() {
   const { lang } = useLanguage();
   const [search, setSearch] = useState("");
 
-  const filtered = ORDERS_DATA.filter((o) =>
-    o.orderNumber.toLowerCase().includes(search.toLowerCase()) ||
-    o.buyer.toLowerCase().includes(search.toLowerCase()) ||
-    o.city.toLowerCase().includes(search.toLowerCase())
+  const filtered = ORDERS_DATA.filter(
+    (o) =>
+      o.orderNumber.toLowerCase().includes(search.toLowerCase()) ||
+      o.buyer.toLowerCase().includes(search.toLowerCase()) ||
+      o.city.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -103,13 +148,15 @@ export default function AdminOrdersPage() {
                     <td className="p-4 font-bold text-[#16803A]">{rupees(o.realization)}</td>
                     <td className="p-4 text-[#687D6B]">{o.date}</td>
                     <td className="p-4 text-right">
-                      <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${
-                        o.status === "Delivered"
-                          ? "bg-[#EEF7EF] text-[#16803A]"
-                          : o.status === "In Transit"
-                          ? "bg-blue-50 text-blue-700"
-                          : "bg-amber-50 text-amber-700"
-                      }`}>
+                      <span
+                        className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${
+                          o.status === "Delivered"
+                            ? "bg-[#EEF7EF] text-[#16803A]"
+                            : o.status === "In Transit"
+                            ? "bg-blue-50 text-blue-700"
+                            : "bg-amber-50 text-amber-700"
+                        }`}
+                      >
                         {o.status}
                       </span>
                     </td>

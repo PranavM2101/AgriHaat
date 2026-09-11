@@ -1,56 +1,57 @@
 "use client";
 
 import { useState } from "react";
-import { UserCheck, Shield, ChevronDown, Check } from "lucide-react";
-import { useAuth, type UserRole } from "@/components/auth/auth-context";
-import { useLanguage } from "@/components/site/language-context";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
+import { ChevronDown, Check, User, ShoppingBag, Truck, Shield } from "lucide-react";
+import { useAuth, UserRole } from "@/components/auth/auth-context";
 
 const ROLE_CONFIG: Record<
   UserRole,
-  { label: string; labelHi: string; desc: string; route: string; color: string }
+  { label: string; icon: React.ComponentType<{ className?: string }>; route: string }
 > = {
   farmer: {
-    label: "Farmer / Seller",
-    labelHi: "किसान / विक्रेता",
-    desc: "List produce, view expected realization, book procurement slots",
+    label: "Farmer Mode",
+    icon: User,
     route: "/farmer/dashboard",
-    color: "bg-[#16803A] text-white",
   },
   buyer: {
-    label: "Buyer / Restaurant",
-    labelHi: "खरीदार / रेस्तरां",
-    desc: "Bulk procurement, demand aggregation, direct sourcing",
+    label: "Buyer Mode",
+    icon: ShoppingBag,
     route: "/buyer/dashboard",
-    color: "bg-[#172019] text-white",
   },
   hub: {
-    label: "Logistics Partner",
-    labelHi: "लॉजिस्टिक्स पार्टनर",
-    desc: "Multi-stop routes, vehicle capacity, dispatch tracking",
+    label: "Collection Hub",
+    icon: Truck,
     route: "/logistics/dashboard",
-    color: "bg-[#16A34A] text-white",
   },
   admin: {
-    label: "Central Admin",
-    labelHi: "केंद्रीय व्यवस्थापक",
-    desc: "Platform health, user & listing audits, AI oversight",
+    label: "Admin Portal",
+    icon: Shield,
     route: "/admin/dashboard",
-    color: "bg-[#07110B] text-white",
   },
 };
 
 export function RoleSwitcherBadge() {
-  const { user, loginAs } = useAuth();
-  const { lang } = useLanguage();
   const router = useRouter();
+  const pathname = usePathname();
+  const { user, loginAsDemo } = useAuth();
   const [open, setOpen] = useState(false);
 
-  const currentRole = user?.role || "farmer";
-  const config = ROLE_CONFIG[currentRole];
+  // Infer active role from current URL path if user state is out of sync
+  const getRoleFromPath = (): UserRole => {
+    if (pathname.startsWith("/buyer")) return "buyer";
+    if (pathname.startsWith("/logistics") || pathname.startsWith("/procurement-center")) return "hub";
+    if (pathname.startsWith("/admin")) return "admin";
+    if (pathname.startsWith("/farmer")) return "farmer";
+    return user?.role || "farmer";
+  };
+
+  const activeRole: UserRole = getRoleFromPath();
+  const currentConfig = ROLE_CONFIG[activeRole] || ROLE_CONFIG.farmer;
+  const ActiveIcon = currentConfig.icon;
 
   const handleSelect = (role: UserRole) => {
-    loginAs(role);
+    loginAsDemo(role);
     setOpen(false);
     router.push(ROLE_CONFIG[role].route);
   };
@@ -60,48 +61,41 @@ export function RoleSwitcherBadge() {
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 rounded-full border border-[#E2E7E2] bg-white px-3 py-1.5 text-xs font-semibold text-[#172019] shadow-2xs hover:bg-[#EEF7EF] transition"
-        aria-label="Switch active user role"
+        className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#EEF7EF] border border-[#D0E7D3] text-xs font-bold text-[#16803A] hover:bg-[#E2F0E4] transition-colors"
       >
-        <span className="size-2 rounded-full bg-[#16803A] animate-pulse" />
-        <span>{lang === "hi" ? config.labelHi : config.label}</span>
-        <ChevronDown className="size-3.5 text-[#687D6B]" />
+        <ActiveIcon className="size-3.5" />
+        <span className="capitalize">{currentConfig.label}</span>
+        <ChevronDown className="size-3 opacity-70" />
       </button>
 
       {open && (
-        <>
-          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-full mt-2 z-50 w-72 overflow-hidden rounded-2xl border border-[#E2E7E2] bg-white p-2 shadow-xl animate-in fade-in slide-in-from-top-2 duration-150">
-            <div className="px-3 py-2 border-b border-[#E2E7E2] text-xs">
-              <p className="font-bold text-[#172019]">Switch Role / Perspective</p>
-              <p className="text-[11px] text-[#687D6B]">1-Click Demo Sandbox Switching</p>
-            </div>
-            <div className="mt-1 space-y-1">
-              {(Object.keys(ROLE_CONFIG) as UserRole[]).map((r) => {
-                const isSelected = r === currentRole;
-                const rConf = ROLE_CONFIG[r];
-                return (
-                  <button
-                    key={r}
-                    type="button"
-                    onClick={() => handleSelect(r)}
-                    className={`flex w-full items-start gap-2.5 rounded-xl p-2.5 text-left text-xs transition ${
-                      isSelected ? "bg-[#EEF7EF] text-[#16803A]" : "hover:bg-[#FAFAF7] text-[#172019]"
-                    }`}
-                  >
-                    <div className="mt-0.5 grid size-5 place-items-center rounded-full bg-[#16803A]/10 text-[#16803A]">
-                      {isSelected ? <Check className="size-3.5" /> : <UserCheck className="size-3" />}
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-bold">{lang === "hi" ? rConf.labelHi : rConf.label}</p>
-                      <p className="text-[10px] text-[#687D6B] line-clamp-1">{rConf.desc}</p>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
+        <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-[#E2E7E2] py-1 z-50">
+          <div className="px-3 py-1.5 border-b border-[#E2E7E2]">
+            <p className="text-[10px] font-semibold text-[#687D6B]">Active Profile</p>
+            <p className="text-xs font-bold text-[#172019] truncate">{user?.name || "Guest User"}</p>
           </div>
-        </>
+
+          {(Object.keys(ROLE_CONFIG) as UserRole[]).map((r) => {
+            const config = ROLE_CONFIG[r];
+            const Icon = config.icon;
+            const isSelected = activeRole === r;
+
+            return (
+              <button
+                key={r}
+                type="button"
+                onClick={() => handleSelect(r)}
+                className="w-full text-left px-3 py-2 text-xs font-medium flex items-center justify-between hover:bg-[#F8FAF8] transition-colors"
+              >
+                <div className="flex items-center gap-2 text-[#172019]">
+                  <Icon className="size-3.5 text-[#16803A]" />
+                  <span>{config.label}</span>
+                </div>
+                {isSelected && <Check className="size-3.5 text-[#16803A]" />}
+              </button>
+            );
+          })}
+        </div>
       )}
     </div>
   );

@@ -1,0 +1,21 @@
+{
+  "name": "AgriHaat AI - Farmer Portal",
+  "short_name": "AgriHaat",
+  "description": "Mobile Agricultural Procurement Platform for Farmers",
+  "start_url": "/farmer/dashboard",
+  "display": "standalone",
+  "background_color": "#FAFAF7",
+  "theme_color": "#16803A",
+  "icons": [
+    {
+      "src": "/agrihaat-logo.jpeg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "/agrihaat-logo.jpeg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}

@@ -5,6 +5,13 @@ import { createContext, useContext, useState, useCallback, type ReactNode } from
 // ─── Supported languages ───
 export type Language = "en" | "hi";
 
+// ─── Devanagari Numeral Conversion Utility ───
+export function toHindiNumerals(num: number | string): string {
+  if (num === null || num === undefined) return "";
+  const hindiDigits = ["०", "१", "२", "३", "४", "५", "६", "७", "८", "९"];
+  return String(num).replace(/\d/g, (digit) => hindiDigits[parseInt(digit, 10)]);
+}
+
 // ─── Translation keys ───
 export interface Translations {
   // Navbar
@@ -307,23 +314,64 @@ interface LanguageContextValue {
   lang: Language;
   setLang: (lang: Language) => void;
   t: Translations;
+  formatNumber: (num: number | string) => string;
+  rupees: (amount: number) => string;
 }
 
 const LanguageContext = createContext<LanguageContextValue>({
   lang: "en",
   setLang: () => undefined,
   t: en,
+  formatNumber: (num) => String(num),
+  rupees: (val) => `₹${val.toLocaleString("en-IN")}`,
 });
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [lang, setLang] = useState<Language>("en");
-  const value = { lang, setLang, t: translations[lang] };
+
+  const formatNumber = useCallback(
+    (num: number | string) => {
+      if (lang === "hi") {
+        return toHindiNumerals(num);
+      }
+      return String(num);
+    },
+    [lang]
+  );
+
+  const rupees = useCallback(
+    (amount: number) => {
+      const formattedNum = amount.toLocaleString("en-IN");
+      if (lang === "hi") {
+        return `₹${toHindiNumerals(formattedNum)}`;
+      }
+      return `₹${formattedNum}`;
+    },
+    [lang]
+  );
+
+  const value = {
+    lang,
+    setLang,
+    t: translations[lang],
+    formatNumber,
+    rupees,
+  };
+
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
 }
 
 export function useLanguage() {
   return useContext(LanguageContext);
 }
+
+// ─── Standalone exported helper (works reactively with language state if imported from hook) ───
+export const rupees = (value?: number | null) => {
+  if (value === undefined || value === null || isNaN(value)) {
+    return "₹0";
+  }
+  return `₹${value.toLocaleString("en-IN")}`;
+};
 
 // ─── Language dropdown component ───
 export function LanguageSwitcher() {
@@ -404,5 +452,3 @@ export function LanguageToggle() {
     </div>
   );
 }
-
-export const rupees = (value: number) => `₹${value.toLocaleString("en-IN")}`;

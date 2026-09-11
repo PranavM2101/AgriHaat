@@ -321,7 +321,7 @@ export const INITIAL_LISTINGS: ProduceListing[] = [
     district: "Karnal",
     state: "Haryana",
     verified: true,
-    image: "/potato.jpg",
+    image: "/basmati.jpg",
     createdAt: "2026-08-25T09:00:00Z",
   },
 ];
@@ -409,10 +409,10 @@ export const INITIAL_ORDERS: Order[] = [
       },
     ],
     totalQuantityKg: 500,
-    totalBuyerAmount: 20000, // ₹40/kg buyer rate
-    totalLogisticsFee: 1500, // ₹3/kg
-    totalPlatformFee: 500,   // ₹1/kg
-    totalFarmerPayable: 18000, // ₹36/kg realization
+    totalBuyerAmount: 20000, // ₹40/kg buyer rate * 500 kg
+    totalLogisticsFee: 1500, // ₹3/kg * 500 kg
+    totalPlatformFee: 500,   // ₹1/kg * 500 kg
+    totalFarmerPayable: 18000, // ₹36/kg realization * 500 kg
     status: "Confirmed",
     statusHistory: [
       { status: "Placed", timestamp: "2026-08-28T09:15:00Z" },

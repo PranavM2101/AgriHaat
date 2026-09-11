@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
@@ -16,25 +17,19 @@ import {
   User,
   Users,
   Building2,
-  Settings,
   LogOut,
   Menu,
   X,
   FileText,
-  ShieldCheck,
-  ChevronRight,
-  HelpCircle,
-  QrCode,
   Layers,
+  Sparkles,
 } from "lucide-react";
-import { Logo } from "@/components/landing/logo";
-import { useAuth } from "@/components/auth/auth-context";
+import { useAuth, UserRole } from "@/components/auth/auth-context";
 import { useLanguage, LanguageSwitcher } from "@/components/site/language-context";
 import { RoleSwitcherBadge } from "./role-switcher";
 import { NotificationDrawer } from "./notification-drawer";
-import { AIAssistantModal } from "@/components/ai/ai-assistant-modal";
 import { QuickTutorialModal } from "./quick-tutorial-modal";
-import { Sparkles } from "lucide-react";
+import { AIChatPopup } from "@/components/ai/AIChatPopup";
 
 interface NavItem {
   label: string;
@@ -51,9 +46,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [aiChatOpen, setAiChatOpen] = useState(false);
 
-  const role = user?.role || "farmer";
+  // Infer role from current URL path if user state is out of sync
+  const getRoleFromPath = (): UserRole => {
+    if (pathname.startsWith("/buyer")) return "buyer";
+    if (pathname.startsWith("/logistics") || pathname.startsWith("/procurement-center")) return "hub";
+    if (pathname.startsWith("/admin")) return "admin";
+    if (pathname.startsWith("/farmer")) return "farmer";
+    return user?.role || "farmer";
+  };
 
-  // Navigation Links tailored to each Role
+  const role: UserRole = user?.role || getRoleFromPath();
+
+  // Dynamic Navigation Links tailored strictly to each Role
   const getNavLinks = (): NavItem[] => {
     switch (role) {
       case "farmer":
@@ -117,6 +121,48 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       ? "/admin/dashboard"
       : "/farmer/dashboard";
 
+  const getPersonaName = () => {
+    if (user?.name) return user.name;
+    switch (role) {
+      case "buyer":
+        return "Anita Rao";
+      case "hub":
+        return "Murugan S.";
+      case "admin":
+        return "AgriHaat Admin";
+      default:
+        return "Ramesh Kumar";
+    }
+  };
+
+  const getPersonaOrg = () => {
+    if (user?.organization) return user.organization;
+    switch (role) {
+      case "buyer":
+        return "ABC Grand Hotels & Restaurants";
+      case "hub":
+        return "Kanchipuram Collection Hub";
+      case "admin":
+        return "AgriHaat Operations";
+      default:
+        return "ABC FPO";
+    }
+  };
+
+  const getAvatarLetter = () => {
+    if (user?.avatarLetter) return user.avatarLetter;
+    switch (role) {
+      case "buyer":
+        return "A";
+      case "hub":
+        return "M";
+      case "admin":
+        return "F";
+      default:
+        return "R";
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#FAFAF7] text-[#172019] flex">
       {/* ─── Desktop Sidebar ─── */}
@@ -124,7 +170,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         {/* Brand Header */}
         <div className="h-[74px] flex items-center px-6 border-b border-[#E2E7E2]">
           <Link href={dashboardHref} className="shrink-0" aria-label="AgriHaat AI Dashboard">
-            <Logo size={32} />
+            <Image
+              src="/agrihaat-logo.jpeg"
+              alt="AgriHaat AI"
+              width={160}
+              height={48}
+              className="h-10 w-auto object-contain rounded-lg"
+              priority
+            />
           </Link>
         </div>
 
@@ -132,11 +185,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <div className="p-4 border-b border-[#E2E7E2] bg-[#FAFAF7]">
           <div className="flex items-center gap-3">
             <div className="grid size-9 place-items-center rounded-full bg-[#16803A] text-white font-bold text-sm shadow-xs">
-              {user?.avatarLetter || "R"}
+              {getAvatarLetter()}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-bold text-[#172019] truncate">{user?.name || "Ramesh Kumar"}</p>
-              <p className="text-[11px] text-[#687D6B] truncate">{user?.organization || "ABC FPO"}</p>
+              <p className="text-xs font-bold text-[#172019] truncate">{getPersonaName()}</p>
+              <p className="text-[11px] text-[#687D6B] truncate">{getPersonaOrg()}</p>
             </div>
           </div>
         </div>
@@ -145,7 +198,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <nav className="flex-1 overflow-y-auto p-3 space-y-1" aria-label="Sidebar Navigation">
           {navLinks.map((item) => {
             const Icon = item.icon;
-            const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href) && item.href !== "/farmer" && item.href !== "/buyer" && item.href !== "/logistics" && item.href !== "/admin");
+            const isActive =
+              pathname === item.href ||
+              (item.href !== "/" &&
+                pathname.startsWith(item.href) &&
+                item.href !== "/farmer" &&
+                item.href !== "/buyer" &&
+                item.href !== "/logistics" &&
+                item.href !== "/admin");
             return (
               <Link
                 key={item.href}
@@ -199,7 +259,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </button>
             <div className="lg:hidden">
               <Link href={dashboardHref}>
-                <Logo size={28} />
+                <Image
+                  src="/agrihaat-logo.jpeg"
+                  alt="AgriHaat AI"
+                  width={140}
+                  height={40}
+                  className="h-8 w-auto object-contain rounded-lg"
+                  priority
+                />
               </Link>
             </div>
             <div className="hidden sm:flex items-center gap-2 text-xs text-[#687D6B]">
@@ -220,8 +287,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
         {/* Mobile Navigation Drawer */}
         {mobileMenuOpen && (
-          <div className="lg:hidden fixed inset-0 z-40 bg-black/40 backdrop-blur-xs top-[74px]" onClick={() => setMobileMenuOpen(false)}>
-            <div className="bg-white w-64 h-[calc(100vh-74px)] p-4 flex flex-col justify-between" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="lg:hidden fixed inset-0 z-40 bg-black/40 backdrop-blur-xs top-[74px]"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <div
+              className="bg-white w-64 h-[calc(100vh-74px)] p-4 flex flex-col justify-between"
+              onClick={(e) => e.stopPropagation()}
+            >
               <nav className="space-y-1">
                 {navLinks.map((item) => {
                   const Icon = item.icon;
@@ -285,19 +358,19 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </nav>
       </div>
 
-      {/* ─── Floating AI Chat Button (visible on all authenticated pages) ─── */}
+      {/* ─── Floating AI Chat Button ─── */}
       <button
         type="button"
-        onClick={() => setAiChatOpen(true)}
+        onClick={() => setAiChatOpen(!aiChatOpen)}
         className="fixed bottom-20 lg:bottom-6 right-4 lg:right-6 z-40 flex items-center gap-2 rounded-full bg-[#16803A] px-4 py-3 text-xs font-bold text-white shadow-lg hover:bg-[#16803A]/90 transition-all hover:scale-105 active:scale-95"
         aria-label="Open AgriHaat AI Copilot"
       >
-        <Sparkles className="size-4" />
-        <span className="hidden sm:inline">Ask AI</span>
+        <Sparkles className="size-4 text-emerald-200" />
+        <span className="hidden sm:inline">{lang === "hi" ? "AI से पूछें" : "Ask AI"}</span>
       </button>
 
-      {/* AI Assistant Modal */}
-      <AIAssistantModal isOpen={aiChatOpen} onClose={() => setAiChatOpen(false)} />
+      {/* Floating AI Chat Popup Component */}
+      <AIChatPopup isOpen={aiChatOpen} onClose={() => setAiChatOpen(false)} />
     </div>
   );
 }

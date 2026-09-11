@@ -45,19 +45,14 @@ export const produceListings = [
     image: "/potato.jpg",
   },
   {
-    id: "rice",
-    name: "Basmati Rice",
-    nameHi: "बासमती चावल",
-    grade: "A",
-    quantity: 2000,
-    unit: "kg",
-    price: 62,
-    location: "Karnal, HR",
-    seller: "Punjab Agri FPO",
-    verified: true,
-    harvest: "15 Sep 2026",
-    image: "/placeholder.svg",
-  },
+  id: "rice", // or "prod-4" / "basmati-rice"
+  name: "Basmati Rice",
+  nameHi: "बासमती चावल",
+  category: "Grains",
+  // Ensure this points to /basmati.jpg
+  image: "/basmati.jpg", 
+  // ... other properties
+},
 ] as const;
 
 export const demandForecast = {
@@ -225,4 +220,3 @@ export const orderSteps = [
   { label: "In Transit", labelHi: "रास्ते में", completed: false },
   { label: "Delivered", labelHi: "डिलीवर हुआ", completed: false },
 ];
-

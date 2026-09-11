@@ -9,8 +9,9 @@ export function ProofSection() {
   const { t } = useLanguage();
 
   return (
-    <section id="proof" className="border-y border-[#E2E7E2] bg-[#EEF7EF] py-20 lg:py-28">
-      <div className="section-container">
+    <section id="proof" className="w-full max-w-full overflow-hidden border-y border-[#E2E7E2] bg-[#EEF7EF] py-16 sm:py-20 lg:py-28">
+      {/* Explicit Tailwind container matching Navbar and HeroSection */}
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="max-w-2xl">
           <ScrollReveal>
@@ -33,7 +34,7 @@ export function ProofSection() {
         </div>
 
         {/* Two Major UI Cards */}
-        <div className="mt-12 grid gap-8 lg:grid-cols-2 lg:gap-10">
+        <div className="mt-10 sm:mt-12 grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-10">
           <ScrollReveal delay={300}>
             <FarmerRealizationCard />
           </ScrollReveal>
