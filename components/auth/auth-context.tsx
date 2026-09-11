@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
 
 export type UserRole = "farmer" | "buyer" | "hub" | "admin";
 
@@ -67,8 +68,8 @@ const DEMO_PROFILES: Record<UserRole, UserProfile> = {
 interface AuthContextType {
   user: UserProfile | null;
   isAuthenticated: boolean;
-  registerUser: (profile: Omit<UserProfile, "id" | "avatarLetter" | "verified">) => void;
-  loginWithCredentials: (identifier: string, pass: string) => boolean;
+  registerUser: (profile: Omit<UserProfile, "id" | "avatarLetter" | "verified">) => Promise<void>;
+  loginWithCredentials: (identifier: string, pass: string) => Promise<boolean>;
   loginAsDemo: (role: UserRole) => void;
   logout: () => void;
   isAuthModalOpen: boolean;
@@ -79,8 +80,8 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType>({
   user: null,
   isAuthenticated: false,
-  registerUser: () => {},
-  loginWithCredentials: () => false,
+  registerUser: async () => {},
+  loginWithCredentials: async () => false,
   loginAsDemo: () => {},
   logout: () => {},
   isAuthModalOpen: false,
@@ -118,8 +119,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // Register dynamic user with password
-  const registerUser = (profileData: Omit<UserProfile, "id" | "avatarLetter" | "verified">) => {
+  // Register user and push record to Supabase profiles table
+  const registerUser = async (profileData: Omit<UserProfile, "id" | "avatarLetter" | "verified">) => {
     const newUser: UserProfile = {
       ...profileData,
       id: `user-${Date.now()}`,
@@ -127,6 +128,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       verified: true,
     };
 
+    // 1. Sync to Supabase
+    try {
+      const { error } = await supabase.from("profiles").insert([
+        {
+          id: newUser.id,
+          name: newUser.name,
+          role: newUser.role,
+          phone: newUser.phone,
+          email: newUser.email,
+          organization: newUser.organization,
+          location: newUser.location,
+          avatar_letter: newUser.avatarLetter,
+          verified: newUser.verified,
+          password: newUser.password,
+        },
+      ]);
+      if (error) console.error("Supabase Profile Sync Error:", error.message);
+    } catch (err) {
+      console.warn("Supabase insert bypassed or offline:", err);
+    }
+
+    // 2. Backup to LocalStorage
     const existingUsersRaw = localStorage.getItem("f2m_registered_users");
     const registeredUsers: UserProfile[] = existingUsersRaw ? JSON.parse(existingUsersRaw) : [];
     registeredUsers.push(newUser);
@@ -136,8 +159,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(newUser);
   };
 
-  // Login checking credentials against registered users
-  const loginWithCredentials = (identifier: string, pass: string): boolean => {
+  // Login checking credentials against Supabase first, falling back to LocalStorage
+  const loginWithCredentials = async (identifier: string, pass: string): Promise<boolean> => {
+    // 1. Check Supabase
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .or(`email.eq.${identifier},phone.eq.${identifier}`)
+        .eq("password", pass)
+        .maybeSingle();
+
+      if (data && !error) {
+        const fetchedUser: UserProfile = {
+          id: data.id,
+          name: data.name,
+          role: data.role as UserRole,
+          phone: data.phone,
+          email: data.email,
+          organization: data.organization,
+          location: data.location,
+          avatarLetter: data.avatar_letter || data.name.charAt(0).toUpperCase(),
+          verified: data.verified,
+        };
+        setUser(fetchedUser);
+        localStorage.setItem("f2m_active_user", JSON.stringify(fetchedUser));
+        return true;
+      }
+    } catch (err) {
+      console.warn("Supabase fetch bypassed or offline:", err);
+    }
+
+    // 2. Local fallback
     const existingUsersRaw = localStorage.getItem("f2m_registered_users");
     const registeredUsers: UserProfile[] = existingUsersRaw ? JSON.parse(existingUsersRaw) : [];
 
@@ -154,7 +207,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return false;
   };
 
-  // Quick fallback demo login
   const loginAsDemo = (role: UserRole) => {
     const demoUser = DEMO_PROFILES[role];
     setUser(demoUser);
