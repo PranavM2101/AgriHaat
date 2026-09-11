@@ -123,3 +123,27 @@
     @apply bg-background text-foreground;
   }
 }
+@layer utilities {
+  .section-container {
+    width: 100%;
+    max-width: 80rem; /* 1280px / max-w-7xl */
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem; /* 16px on mobile */
+    padding-right: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .section-container {
+      padding-left: 1.5rem; /* 24px on tablet */
+      padding-right: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .section-container {
+      padding-left: 2rem; /* 32px on desktop */
+      padding-right: 2rem;
+    }
+  }
+}
